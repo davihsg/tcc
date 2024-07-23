@@ -7,7 +7,7 @@ import (
 )
 
 func WithoutAuthHandler(router *gin.Engine) {
-	router.GET("/without_auth/items", func(ctx *gin.Context) {
+	router.GET("/withoutauth/items", func(ctx *gin.Context) {
 		rows, err := db.Query("SELECT id, name FROM items LIMIT 40")
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
