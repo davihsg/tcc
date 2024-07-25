@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  envoy:
+    container_name: envoy
+    image: envoyproxy/envoy:contrib-v1.29.1
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+      - /tmp/spire-agent/public:/tmp/spire-agent/public
+    ports:
+      - "10000:10000"
+     #- "10001:10001"
+      - "10002:10002"
+    command: ["envoy", "-c", "/etc/envoy/envoy.yaml","-l","debug"]

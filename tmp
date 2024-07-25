@@ -1,0 +1,18 @@
+PID attested to have selectors                pid=4475 selectors="
+[
+type:\"docker\"  value:\"label:com.docker.compose.project:envoy\"
+type:\"docker\"  value:\"label:com.docker.compose.service:envoy\"
+type:\"docker\"  value:\"label:com.docker.compose.container-number:1\"
+type:\"docker\"  value:\"label:com.docker.compose.depends_on:\"
+type:\"docker\"  value:\"label:com.docker.compose.image:sha256:644f45f6626c1b946b7ae8d51f94a7bc5178d3131483b0045854a548bb8512b8\"
+type:\"docker\"  value:\"label:com.docker.compose.oneoff:False\"
+type:\"docker\"  value:\"label:com.docker.compose.project.config_files:/home/envoy/envoy/compose.yaml\"
+type:\"docker\"  value:\"label:com.docker.compose.project.working_dir:/home/envoy/envoy\"
+type:\"docker\"  value:\"label:com.docker.compose.version:2.29.1\"
+type:\"docker\"  value:\"label:org.opencontainers.image.ref.name:ubuntu\"
+type:\"docker\"  value:\"label:com.docker.compose.config-hash:e6d34256ab50426bc4b414b6747be1442af95a99800f21bdad179dbf794dce0f\"
+type:\"docker\"  value:\"label:org.opencontainers.image.version:22.04\"
+type:\"docker\"  value:\"env:PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"
+type:\"docker\"  value:\"env:DEBIAN_FRONTEND=noninteractive\"
+type:\"docker\"  value:\"image_id:envoyproxy/envoy:contrib-v1.29.1\"
+]" subsystem_name=workload_attestor

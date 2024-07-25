@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -11,8 +12,14 @@ import (
 var db *sql.DB
 
 func main() {
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "items.db"
+	}
+
 	var err error
-	db, err = sql.Open("sqlite3", "./items.db")
+
+	db, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		panic(err)
 	}
