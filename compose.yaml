@@ -53,17 +53,7 @@ services:
     container_name: rate_limiter
     build: ./rate_limiter
     ports:
-    - "1111:8080"
-    networks:
-    - internal
-
-  api:
-    container_name: api
-    build: ./api
-    ports:
-    - "8888:8888"
-    environment:
-    - DB_PATH=/app/items.db
+    - "9999:9999"
     networks:
     - internal
 
@@ -86,7 +76,6 @@ services:
     depends_on:
     - fluent-bit
     - rate_limiter
-    - api
     networks:
     - internal
 
