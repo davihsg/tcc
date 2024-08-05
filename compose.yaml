@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   opensearch:
     container_name: opensearch
@@ -49,9 +47,9 @@ services:
     networks:
     - internal
 
-  rate_limiter:
-    container_name: rate_limiter
-    build: ./rate_limiter
+  rate-limiter:
+    container_name: rate-limiter
+    build: ./rate-limiter
     ports:
     - "9999:9999"
     networks:
@@ -75,9 +73,16 @@ services:
     command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "-l", "info"]
     depends_on:
     - fluent-bit
-    - rate_limiter
+    - rate-limiter
+    - dummy-api
     networks:
     - internal
+
+  dummy-api:
+    container_name: dummy-api
+    build: ./api
+    ports:
+      - "8888:8888"
 
 networks:
   internal:
