@@ -4,17 +4,17 @@ In the rapidly evolving context of distributed systems, secure and efficient ser
 
 ## Envoy
 
-Envoy is an open-source L7 proxy designed for large modern service oriented architectures [1](#references-1). Envoy was created to make the network transparent to the applications, and to help developers trace erros faster by having another component dealing with the network concert out of the application stack [1](#references-1).
+Envoy is an open-source L7 proxy designed for large modern service oriented architectures [[1](#references-1)]. Envoy was created to make the network transparent to the applications, and to help developers trace erros faster by having another component dealing with the network concert out of the application stack [[1](#references-1)].
 
 ## Spire and SPIFFE
 
-SPIFFE (the Secure Production Identity Framework For Everyone) is a set of open-source standards for securely identifying software systems in dynamic environments. With SPIFFE, services and wordloads can assume identities - short lived cryptographic identity documents called SVID - to communicate with others services and workloads via a simple API [2](#references-2).
+SPIFFE (the Secure Production Identity Framework For Everyone) is a set of open-source standards for securely identifying software systems in dynamic environments. With SPIFFE, services and wordloads can assume identities - short lived cryptographic identity documents called SVID - to communicate with others services and workloads via a simple API [[2](#references-2)].
 
-SPIRE (the SPIFFE Runtime Environment) is a implementation of the SPIFFE APIs, which performs node and wordload attestation to securely issue and to verify SVIDs [3](#references-3). This integration ensures that every service within the mesh can be authenticated and authorized securely, thereby mitigating the risks associated with unauthorized access.
+SPIRE (the SPIFFE Runtime Environment) is a implementation of the SPIFFE APIs, which performs node and wordload attestation to securely issue and to verify SVIDs [[3](#references-3)]. This integration ensures that every service within the mesh can be authenticated and authorized securely, thereby mitigating the risks associated with unauthorized access.
 
 ## OpenSearch
 
-OpenSearch is open-source search-engine forked from the ElasticSearch service [4](#references-4). OpenSearch is flexible and scalable for data-intensive applications [5](#references-5). By utilizing OpenSearch, organizations can aggregate, visualize, and analyze logs, facilitating real-time insights into the behavior and performance of their services.
+OpenSearch is open-source search-engine forked from the ElasticSearch service [[4](#references-4)]. OpenSearch is flexible and scalable for data-intensive applications [[5](#references-5)]. By utilizing OpenSearch, organizations can aggregate, visualize, and analyze logs, facilitating real-time insights into the behavior and performance of their services.
 
 ## Objective
 
@@ -34,4 +34,4 @@ The objective of this thesis is to demonstrate how combining Envoy, SPIRE, and O
 
 ## Author
 
-- (davihsg)[github.com/davihsg]
+- [davihsg](github.com/davihsg)
