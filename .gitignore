@@ -1,3 +1,4 @@
 spire/bin
 api/server
 spire/data
+.DS_Store
