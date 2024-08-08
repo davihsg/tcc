@@ -1,0 +1,16 @@
+{
+  "descriptors": [
+    {
+      "entries": [
+        {
+          "key": "spiffe_id",
+          "value": "spiffe://dhsg.com/dummy-user"
+        },
+        {
+          "key": "path",
+          "value": "/items"
+        }
+      ]
+    }
+  ]
+}

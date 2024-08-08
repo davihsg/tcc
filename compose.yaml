@@ -3,10 +3,12 @@ services:
     container_name: opensearch
     image: opensearchproject/opensearch:latest
     environment:
-    - OPENSEARCH_INITIAL_ADMIN_PASSWORD=BkK8[(SdJ*,#&G4g
-    - discovery.type=single-node
-    - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
-    - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=BkK8[(SdJ*,#&G4g
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
     ulimits:
       memlock:
         soft: -1
@@ -15,74 +17,71 @@ services:
         soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
         hard: 65536
     ports:
-    - 9200:9200
-    - 9600:9600 # required for Performance Analyzer
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
     networks:
-    - internal
-
+      - internal
   opensearch-dashboard:
     image: opensearchproject/opensearch-dashboards:latest
     container_name: opensearch-dashboards
     ports:
-    - 5601:5601
+      - 5601:5601
     expose:
-    - "5601"
+      - "5601"
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
     depends_on:
-    - opensearch
+      - opensearch
     networks:
-    - internal
-
+      - internal
   fluent-bit:
     image: fluent/fluent-bit:latest
     container_name: fluent-bit
     ports:
-    - "24224:24224"
+      - "24224:24224"
     volumes:
-    - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
-    - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf
     depends_on:
-    - opensearch
+      - opensearch
     networks:
-    - internal
-
-  rate-limiter:
-    container_name: rate-limiter
-    build: ./rate-limiter
-    ports:
-    - "9999:9999"
-    networks:
-    - internal
-
+      - internal
   envoy:
     container_name: envoy
     image: envoyproxy/envoy:contrib-v1.29.1
     volumes:
-    - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
-    - /tmp/spire-agent/public:/tmp/spire-agent/public
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
+      - ./envoy/lua/ratelimit.lua:/etc/lua/ratelimit.lua
+      - ./envoy/lua/lib:/var/lib/lua
+      - /tmp/spire-agent/public:/tmp/spire-agent/public
     logging:
       driver: "fluentd"
       options:
         fluentd-address: "localhost:24224"
         tag: envoy
     ports:
-    - "10000:10000"
-  # - "10001:10001"
-    - "10002:10002"
-    command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "-l", "info"]
+      - "10000:10000"
+      # - "10001:10001"
+      - "10002:10002"
+      - "9901:9901" # admin port
+    command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "-l", "debug"]
     depends_on:
-    - fluent-bit
-    - rate-limiter
-    - dummy-api
+      - fluent-bit
+      - dummy-api
     networks:
-    - internal
-
+      - internal
   dummy-api:
     container_name: dummy-api
     build: ./api
+    environment:
+      DB_PATH: /var/lib/api/items.db
     ports:
       - "8888:8888"
-
+    volumes:
+      - ./api/items.db:/var/lib/api/items.db
+    networks:
+      - internal
 networks:
   internal:
+volumes:
+  opensearch-data:

@@ -7,21 +7,17 @@ fi
 
 N=$1
 SVC_USER="server"
-DB_DIR="/var/lib/api"
+DB_DIR="../api"
 DB_FILE="$DB_DIR/items.db"
 
 if [ ! -d "$DB_DIR" ]; then
     echo "Creating directory $DB_DIR"
     sudo mkdir -p "$DB_DIR"
-    sudo chown $SVC_USER:$SVC_USER "$DB_DIR"
+    # sudo chown $SVC_USER:$SVC_USER "$DB_DIR"
     sudo chmod 750 "$DB_DIR"
 fi
 
-if [ -f "$DB_FILE" ]; then
-    echo "$DB_FILE already exists. Skipping creation and population."
-    exit 0
-fi
-
+# creating table
 sqlite3 $DB_FILE <<EOF
 CREATE TABLE IF NOT EXISTS items (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -31,6 +27,11 @@ CREATE TABLE IF NOT EXISTS items (
 );
 EOF
 
+# cleaning up table
+sqlite3 $DB_FILE <<EOF
+DELETE FROM items;
+EOF
+
 insert_item() {
     local name=$1
     local price=$2
@@ -38,7 +39,6 @@ insert_item() {
     sqlite3 $DB_FILE <<EOF
 INSERT INTO items (name, price, description) VALUES ('$name', $price, '$description');
 EOF
-    sudo chown $SVC_USER:$SVC_USER "$DB_FILE"
 }
 
 for i in $(seq 1 $N); do

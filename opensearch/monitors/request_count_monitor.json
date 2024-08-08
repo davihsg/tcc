@@ -1,0 +1,138 @@
+{
+  "name": "request-limit-monitor",
+  "type": "monitor",
+  "monitor_type": "bucket_level_monitor",
+  "enabled": true,
+  "schedule": {
+    "period": {
+      "unit": "MINUTES",
+      "interval": 1
+    }
+  },
+  "inputs": [
+    {
+      "search": {
+        "indices": [
+          "envoy"
+        ],
+        "query": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "range": {
+                    "start_time": {
+                      "from": "{{period_end}}||-10m",
+                      "to": "{{period_end}}",
+                      "include_lower": true,
+                      "include_upper": true,
+                      "format": "epoch_millis",
+                      "boost": 1
+                    }
+                  }
+                },
+                {
+                  "exists": {
+                    "field": "spiffe_id",
+                    "boost": 1
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          },
+          "aggregations": {
+            "terms_agg": {
+              "terms": {
+                "field": "spiffe_id.keyword",
+                "size": 10,
+                "min_doc_count": 1,
+                "shard_min_doc_count": 0,
+                "show_term_doc_count_error": false,
+                "order": [
+                  {
+                    "_count": "desc"
+                  },
+                  {
+                    "_key": "asc"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "bucket_level_trigger": {
+        "id": "IiXAL5EBp1H7vfUaAi_-",
+        "name": "high_request_count_trigger",
+        "severity": "1",
+        "condition": {
+          "buckets_path": {
+            "_count": "_count"
+          },
+          "parent_bucket_path": "terms_agg",
+          "script": {
+            "source": "params._count > 10",
+            "lang": "painless"
+          },
+          "gap_policy": "skip"
+        },
+        "actions": []
+      }
+    }
+  ],
+  "ui_metadata": {
+    "schedule": {
+      "timezone": null,
+      "frequency": "interval",
+      "period": {
+        "unit": "MINUTES",
+        "interval": 1
+      },
+      "daily": 0,
+      "weekly": {
+        "tue": false,
+        "wed": false,
+        "thur": false,
+        "sat": false,
+        "fri": false,
+        "mon": false,
+        "sun": false
+      },
+      "monthly": {
+        "type": "day",
+        "day": 1
+      },
+      "cronExpression": "0 */1 * * *"
+    },
+    "monitor_type": "bucket_level_monitor",
+    "search": {
+      "searchType": "query",
+      "timeField": "start_time",
+      "aggregations": [],
+      "groupBy": [
+        "spiffe_id"
+      ],
+      "bucketValue": 10,
+      "bucketUnitOfTime": "m",
+      "filters": [
+        {
+          "fieldName": [
+            {
+              "label": "spiffe_id",
+              "type": "keyword"
+            }
+          ],
+          "fieldValue": "",
+          "operator": "is_not_null"
+        }
+      ]
+    }
+  }
+}

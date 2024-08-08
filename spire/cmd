@@ -1,1 +1,1 @@
-bin/spire-agent run -config conf/agent/agent.conf -joinToken 48ce9fea-8c2c-436a-9ca0-dfe0b36e73fe &
+bin/spire-agent run -config conf/agent/agent.conf -joinToken 3a69a957-edbc-4ede-b420-dce8499e95e4 &
