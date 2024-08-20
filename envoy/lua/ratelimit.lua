@@ -4,7 +4,8 @@ local os_cluster = "opensearch"
 local os_user = "admin"
 local os_password = "BkK8[(SdJ*,#&G4g"
 
-local monitorId = "8yW7L5EBp1H7vfUalij1" -- add the monitor id here
+-- local monitorId = "8yW7L5EBp1H7vfUalij1" -- request count monitor
+local monitorId = "6igWM5EBp1H7vfUaQdcy" -- duration sum monitor
 
 local function get_path()
 	local path = "/_plugins/_alerting/monitors/alerts"

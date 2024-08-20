@@ -1,13 +1,21 @@
 #!/bin/bash
 
-URL="https://localhost:10002/items"
-CACERT="bundle.0.pem"
-CERT="svid.0.pem"
-KEY="svid.0.key"
-NUM_REQUESTS=20
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <cert>"
+    exit 1
+fi
 
-# Loop to make 100 requests
+USER="$1"
+URL="https://localhost:10002/items"
+CACERT="bundle.$USER.pem"
+CERT="svid.$USER.pem"
+KEY="svid.$USER.key"
+NUM_REQUESTS=10
+
+# Loop to make requests
 for ((i=1; i<=NUM_REQUESTS; i++))
 do
-  curl --cacert $CACERT --cert $CERT --key $KEY "$URL" -k
+  curl -s --cacert $CACERT --cert $CERT --key $KEY "$URL" -k >> /dev/null
 done
+
+echo "$NUM_REQUESTS requests done"
