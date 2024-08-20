@@ -20,10 +20,6 @@ OpenSearch is an open-source search-engine forked from the ElasticSearch service
 
 The objective of this thesis is to demonstrate how combining Envoy, SPIRE, and OpenSearch can create a secure and observable dynamic access control. 
 
-## Architecture
-
-![Architecture](./assets/architecture.png)
-
 ## References
 
 1. <a name="references-1"/> https://www.envoyproxy.io/docs/envoy/v1.31.0/intro/what_is_envoy
@@ -31,7 +27,3 @@ The objective of this thesis is to demonstrate how combining Envoy, SPIRE, and O
 3. <a name="references-3"/> https://spiffe.io/docs/latest/spire-about/spire-concepts
 4. <a name="references-4"/> https://en.wikipedia.org/wiki/OpenSearch_(software)
 5. <a name="references-5"/> https://opensearch.org/docs/latest/getting-started/intro
-
-## Author
-
-- [davihsg](github.com/davihsg)
