@@ -42,3 +42,7 @@ Once the user has not reached a limit, the request is forwarded to the API, and 
 
 ### 6. Envoy → Fluentbit → Opensearch
 Envoy container logs are being collected by Fluent Bit, which then processes and sends them to Opensearch.
+
+## Authors
+
+- [davihsg](https://github.com/davihsg)
