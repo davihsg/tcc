@@ -2,7 +2,7 @@
 
 This repository presents a simple, yet sofisticated, implementation of access control using Envoy Proxy and Opensearch aligned with a Secret Discovery Service (SDS), in this case, SPIRE.
 
-# Motivation
+## Motivation
 
 Envoy is an open-source L7 proxy created to make the network transparent for the applications, and to help developers trace errors by having another component dealing with the network concern.
 One of its features is Rate Limiting. Envoy has three types of rate limiting implementations:
@@ -15,7 +15,9 @@ One of its features is Rate Limiting. Envoy has three types of rate limiting imp
 
 Even though you can implement your own gRPC rate limiting service, the proto tree is very extensive, and Envoy's reference implementation in Go only supports requests per unit of time, which isn't ideal for highly sensitive data systems.
 
-That's where Opensearch comes in. Opensearch is an open-source engine tha
+That's when Opensearch comes in. Opensearch is an open-source engine for data visualization, such as search, aggregation, and audit logging. Such powerful tool is very often integrated with many systems because of its data processing capabilities, so why not use it for access control?
+
+With Envoy controling all the network flow, we can easily injest its logs into Opensearch and implement our own rate limiting service.
 
 ## Author
 
