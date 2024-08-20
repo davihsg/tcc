@@ -1,4 +1,5 @@
 services:
+  # Opensearch
   opensearch:
     container_name: opensearch
     image: opensearchproject/opensearch:latest
@@ -34,6 +35,7 @@ services:
       - opensearch
     networks:
       - internal
+  # Fluent bit
   fluent-bit:
     image: fluent/fluent-bit:latest
     container_name: fluent-bit
@@ -42,10 +44,13 @@ services:
     volumes:
       - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf
+      - ./fluent-bit/envoy.conf:/fluent-bit/etc/envoy.conf
+      - ./fluent-bit/api.conf:/fluent-bit/etc/api.conf
     depends_on:
       - opensearch
     networks:
       - internal
+  # Envoy
   envoy:
     container_name: envoy
     image: envoyproxy/envoy:contrib-v1.29.1
@@ -70,6 +75,7 @@ services:
       - dummy-api
     networks:
       - internal
+  # Dummy API
   dummy-api:
     container_name: dummy-api
     build: ./api
