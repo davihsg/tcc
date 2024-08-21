@@ -2,7 +2,7 @@ services:
   # Opensearch
   opensearch:
     container_name: opensearch
-    image: opensearchproject/opensearch:latest
+    image: opensearchproject/opensearch:2.16.0
     environment:
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=BkK8[(SdJ*,#&G4g
       - discovery.type=single-node
@@ -23,7 +23,7 @@ services:
     networks:
       - internal
   opensearch-dashboard:
-    image: opensearchproject/opensearch-dashboards:latest
+    image: opensearchproject/opensearch-dashboards:2.16.0
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
@@ -37,7 +37,7 @@ services:
       - internal
   # Fluent bit
   fluent-bit:
-    image: fluent/fluent-bit:latest
+    image: fluent/fluent-bit:3.1.6
     container_name: fluent-bit
     ports:
       - "24224:24224"
@@ -45,9 +45,10 @@ services:
       - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf
       - ./fluent-bit/envoy.conf:/fluent-bit/etc/envoy.conf
-      - ./fluent-bit/api.conf:/fluent-bit/etc/api.conf
+      - ./fluent-bit/containers.conf:/fluent-bit/etc/containers.conf
     depends_on:
       - opensearch
+      - cadvisor
     networks:
       - internal
   # Envoy
@@ -68,7 +69,6 @@ services:
       - "10000:10000"
       # - "10001:10001"
       - "10002:10002"
-      - "9901:9901" # admin port
     command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "-l", "debug"]
     depends_on:
       - fluent-bit
@@ -85,6 +85,21 @@ services:
       - "8888:8888"
     volumes:
       - ./api/items.db:/var/lib/api/items.db
+    networks:
+      - internal
+  # cAdvisor
+  cadvisor:
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8080:8080"
+    restart: always
     networks:
       - internal
 networks:
