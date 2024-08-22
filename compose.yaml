@@ -86,21 +86,29 @@ services:
       - ./api/items.db:/var/lib/api/items.db
     networks:
       - internal
-      # cAdvisor
-      #cadvisor:
-      #  container_name: cadvisor
-      #  image: gcr.io/cadvisor/cadvisor:v0.49.1
-      #  volumes:
-      #    - /:/rootfs:ro
-      #    - /var/run:/var/run:ro
-      #    - /sys:/sys:ro
-      #    - /var/lib/docker/:/var/lib/docker:ro
-      #    - /dev/disk/:/dev/disk:ro
-      #  ports:
-      #    - "8080:8080"
-      #  restart: always
-      #  networks:
-      #    - internal
+  # Alerting API
+  alerting:
+    container_name: alerting
+    build: ./alerting
+    ports:
+      - "31415:31415"
+    networks:
+      - internal
+  # cAdvisor
+  cadvisor:
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - internal
 networks:
   internal:
 volumes:
