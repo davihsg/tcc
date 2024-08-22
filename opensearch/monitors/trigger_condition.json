@@ -1,0 +1,12 @@
+{
+  "buckets_path": {
+    "sum_duration": "sum_duration"
+  },
+  "parent_bucket_path": "terms_agg",
+  "script": {
+    "source": "params.sum_duration > 100",
+    "lang": "painless"
+  },
+  "gap_policy": "skip"
+}
+

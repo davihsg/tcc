@@ -1,0 +1,18 @@
+{
+  "config_id": "OqskdpEBl4KNMQxhQMg1",
+  "last_updated_time_ms": 1724264264843,
+  "created_time_ms": 1724263972913,
+  "config": {
+    "name": "alerting-api",
+    "description": "",
+    "config_type": "webhook",
+    "is_enabled": true,
+    "webhook": {
+      "url": "http://alerting:31415/alert",
+      "header_params": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    }
+  }
+}

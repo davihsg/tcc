@@ -21,7 +21,7 @@ services:
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
     networks:
-      - internal
+      - world
   opensearch-dashboard:
     image: opensearchproject/opensearch-dashboards:2.16.0
     container_name: opensearch-dashboards
@@ -34,7 +34,7 @@ services:
     depends_on:
       - opensearch
     networks:
-      - internal
+      - world
   # Fluent bit
   fluent-bit:
     image: fluent/fluent-bit:3.1.6
@@ -49,7 +49,7 @@ services:
     depends_on:
       - opensearch
     networks:
-      - internal
+      - world
   # Envoy
   envoy:
     container_name: envoy
@@ -75,7 +75,7 @@ services:
       - dummy-api
       - webdis
     networks:
-      - internal
+      - world
       - webdis
   # Dummy API
   dummy-api:
@@ -88,7 +88,7 @@ services:
     volumes:
       - ./dummy-api/items.db:/var/lib/api/items.db
     networks:
-      - internal
+      - world
   # Alerting API
   alerting:
     container_name: alerting
@@ -96,7 +96,7 @@ services:
     ports:
       - "31415:31415"
     networks:
-      - internal
+      - world
   # cAdvisor
   #cadvisor:
   #  container_name: cadvisor
@@ -111,7 +111,7 @@ services:
   #    - "8080:8080"
   #  restart: always
   #  networks:
-  #    - internal
+  #    - world
   webdis:
     container_name: webdis
     image: nicolas/webdis:0.1.22
@@ -120,7 +120,7 @@ services:
     networks:
       - webdis
 networks:
-  internal:
+  world:
   webdis:
 volumes:
   opensearch-data:

@@ -1,0 +1,54 @@
+{
+  "mappings": {
+    "properties": {
+      "global_scope": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "monitor_name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "period_end": {
+        "type": "date"
+      },
+      "period_start": {
+        "type": "date"
+      },
+      "severity": {
+        "type": "long"
+      },
+      "spiffe_id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "state": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      }
+    }
+  }
+}
