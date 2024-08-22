@@ -5,7 +5,7 @@ class Alert:
     def __init__(
         self,
         id: str,
-        spiffe_id: str,
+        spiffe_id: Optional[str],
         monitor_name: str,
         severity: int,
         period_start: str,

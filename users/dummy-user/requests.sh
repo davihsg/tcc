@@ -6,16 +6,17 @@ if [ "$#" -ne 1 ]; then
 fi
 
 USER="$1"
-URL="https://localhost:10002/items"
-CACERT="bundle.$USER.pem"
-CERT="svid.$USER.pem"
-KEY="svid.$USER.key"
-NUM_REQUESTS=10
+url="https://localhost:10002/items"
+certs_folders="$HOME/tcc/users/dummy-user/"
+cacert="$certs_folders/bundle.$USER.pem"
+cert="$certs_folders/svid.$USER.pem"
+key="$certs_folders/svid.$USER.key"
+num_requests=10
 
 # Loop to make requests
-for ((i=1; i<=NUM_REQUESTS; i++))
+for ((i=1; i<=num_requests; i++))
 do
-  curl -s --cacert $CACERT --cert $CERT --key $KEY "$URL" -k >> /dev/null
+  curl -s --cacert $cacert --cert $cert --key $key "$url" -k >> /dev/null
 done
 
-echo "$NUM_REQUESTS requests done"
+echo "$num_requests requests done"

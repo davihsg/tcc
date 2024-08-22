@@ -1,0 +1,15 @@
+{
+  "alerts": [
+    {
+      "id": "hK2Pd5EBl4KNMQxhP1_i",
+      "spiffe_id": "spiffe://dhsg.com/dummy-user",
+      "monitor_name": "envoy-monitor",
+      "severity": 3,
+      "period_start": "2024-08-22T00:48:21.562Z",
+      "period_end": "2024-08-22T00:49:21.562Z",
+      "state": "ACTIVE",
+      "global_scope": false
+    },
+    null
+  ]
+}

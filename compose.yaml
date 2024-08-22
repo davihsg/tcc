@@ -68,12 +68,15 @@ services:
       - "10000:10000"
       # - "10001:10001"
       - "10002:10002"
+      - "8379:8379"
     command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "-l", "debug"]
     depends_on:
       - fluent-bit
       - dummy-api
+      - webdis
     networks:
       - internal
+      - webdis
   # Dummy API
   dummy-api:
     container_name: dummy-api
@@ -95,21 +98,29 @@ services:
     networks:
       - internal
   # cAdvisor
-  cadvisor:
-    container_name: cadvisor
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
+  #cadvisor:
+  #  container_name: cadvisor
+  #  image: gcr.io/cadvisor/cadvisor:v0.49.1
+  #  volumes:
+  #    - /:/rootfs:ro
+  #    - /var/run:/var/run:ro
+  #    - /sys:/sys:ro
+  #    - /var/lib/docker/:/var/lib/docker:ro
+  #    - /dev/disk/:/dev/disk:ro
+  #  ports:
+  #    - "8080:8080"
+  #  restart: always
+  #  networks:
+  #    - internal
+  webdis:
+    container_name: webdis
+    image: nicolas/webdis:0.1.22
     ports:
-      - "8080:8080"
-    restart: always
+      - "7379:7379"
     networks:
-      - internal
+      - webdis
 networks:
   internal:
+  webdis:
 volumes:
   opensearch-data:

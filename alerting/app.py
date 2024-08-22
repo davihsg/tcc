@@ -4,7 +4,7 @@ import webdis
 
 app = Flask(__name__)
 GLOBAL_KEY = "global_scope"
-webdis_client = webdis.Client("http://webdis:7379")
+webdis_client = webdis.Client("https://envoy:8379")
 
 
 def process_alert(alert: alerting.Alert):
@@ -31,8 +31,6 @@ def receive_alert():
         j = request.get_json()
     except Exception as e:
         return jsonify({"error": f"{str(e)}"}), 400
-
-    app.logger.debug(f"{j}")
 
     body = alerting.PostAlertRequestBody(**j)
 
