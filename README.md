@@ -5,8 +5,6 @@ This repository presents a simple, yet sophisticated, implementation of access c
 
 ## Architecture
 
-The architecture assumes that Envoy logs are being sent to Opensearch under the index `envoy`. If not, you can check this example.
-
 ![architecture-overview](https://github.com/davihsg/tcc/raw/main/assets/architecture-overview.png)
 
 Here's a brief explanation of each step in the flow:
