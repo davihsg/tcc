@@ -80,13 +80,13 @@ services:
   # Dummy API
   dummy-api:
     container_name: dummy-api
-    build: ./api
+    build: ./dummy-api
     environment:
       DB_PATH: /var/lib/api/items.db
     ports:
       - "8888:8888"
     volumes:
-      - ./api/items.db:/var/lib/api/items.db
+      - ./dummy-api/items.db:/var/lib/api/items.db
     networks:
       - internal
   # Alerting API
