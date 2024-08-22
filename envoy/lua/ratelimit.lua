@@ -24,20 +24,8 @@ function envoy_on_request(request_handle)
 	if headers[":status"] == "200" then
 		local data = JSON:decode(body)
 
-		local alerts = data["MGET"][1]
-		local global_scope = data["MGET"][2]
-
-		if alerts == nil then
-			alerts = 0
-		else
-			alerts = tonumber(alerts)
-		end
-
-		if global_scope == nil then
-			global_scope = 0
-		else
-			global_scope = tonumber(global_scope)
-		end
+		local alerts = tonumber(data["MGET"][1]) or 0
+		local global_scope = tonumber(data["MGET"][2]) or 0
 
 		if global_scope > 0 then
 			local response = {
