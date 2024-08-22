@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 
-class Alert:
+class Alert(object):
     def __init__(
         self,
         id: str,

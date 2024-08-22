@@ -275,10 +275,10 @@ static_resources:
             name: envoy.transport_sockets.tls
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
-              #require_client_certificate: true
+              require_client_certificate: false
               common_tls_context:
                 tls_certificate_sds_secret_configs:
-                  - name: spiffe://dhsg.com/envoy-api
+                  - name: "spiffe://dhsg.com/envoy-api"
                     sds_config:
                       resource_api_version: V3
                       api_config_source:
@@ -287,16 +287,6 @@ static_resources:
                         grpc_services:
                           envoy_grpc:
                             cluster_name: spire_agent
-                            #validation_context_sds_secret_config:
-                            # name: "spiffe://dhsg.com"
-                            # sds_config:
-                            #   resource_api_version: V3
-                            #   api_config_source:
-                            #     api_type: GRPC
-                            #     transport_api_version: V3
-                            #     grpc_services:
-                            #       envoy_grpc:
-                            #         cluster_name: spire_agent
   clusters:
     - name: api
       connect_timeout: 0.25s

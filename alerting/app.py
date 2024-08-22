@@ -1,10 +1,18 @@
 from flask import Flask, request, jsonify
+from opensearchpy import OpenSearch
+
 import alerting
 import webdis
 
 app = Flask(__name__)
 GLOBAL_KEY = "global_scope"
 webdis_client = webdis.Client("https://envoy:8379")
+os_client = OpenSearch(
+    hosts=[{"host": "opensearch", "port": 9200}],
+    http_auth=("admin", "BkK8[(SdJ*,#&G4g"),
+    use_ssl=True,
+    verify_certs=False,
+)
 
 
 def process_alert(alert: alerting.Alert):
@@ -23,6 +31,8 @@ def process_alert(alert: alerting.Alert):
             webdis_client.incr(alert.spiffe_id)
         elif alert.state == alerting.COMPLETED:
             webdis_client.decr(alert.spiffe_id)
+
+    os_client.index(index="alerts", body=alert.__dict__)
 
 
 @app.route("/alert", methods=["POST"])
