@@ -1,31 +1,35 @@
 ![opensearch+envoy](https://github.com/davihsg/tcc/raw/main/assets/opensearch+envoy.png)
 # Opensearch and Envoy
 
-This repository presents a simple, yet sophisticated, implementation of access control using Envoy Proxy and Opensearch aligned with a Secret Discovery Service (SDS), in this case, SPIRE.
+This repository presents a simple, yet sophisticated, implementation of access control using Envoy Proxy and Opensearch.
 
-## Running
+## Architecture
 
-We are using docker to manage the network between services since it provides a simple DNS server that makes the communication a lot easier. Only the SDS server, SPIRE, won't be running on docker.
+The architecture assumes that Envoy logs are being sent to Opensearch under the index `envoy`. If not, you can check this example.
 
-### Setup
+![architecture-overview](https://github.com/davihsg/tcc/raw/main/assets/architecture-overview.png)
 
-To start this example, first clone the current repository:
+Here's a brief explanation of each step in the flow:
 
-```bash
-$ git clone https://github.com/davihsg/tcc.git
-```
+1. **User Request:**  
+   An authenticated user sends a request to the Envoy proxy, including its SVID certificate for identification and authentication. The SVID helps in determining the user's identity securely.
 
-### SPIRE
+2. **Rate limiting check:**  
+   Envoy runs a Lua script to check if the user has reached a predefined request limit. It does this by fetching information from a Redis database, using Webdis as an intermediary. Webdis is employed because Envoy's Lua library supports HTTP/HTTPS natively, not TCP, making it necessary to access Redis in this manner. If the user hasn't exceeded the limit, Envoy processes the request normally. If the limit is exceeded, Envoy returns a `429 Too Many Requests` response to the user.
 
-SPIRE is going to be the SDS. SPIRE performs node and wordload attestation to issue, and to verify SVIDs - short lived cryptographic identity documents. It has a great integration with Envoy, and if you want to use another SDS, you will have to update Envoy's configuration.
+3. **Forwarding to API:**  
+   If the request is valid and within the allowed limit, Envoy forwards it to the API for further processing.
 
-In order to run this example, the spire-agent must be running on the same machine as the envoy container. Check [here](https://github.com/davihsg/tcc/tree/main/spire#readme) how to setup a development SPIRE environment.
+4. **Logging to OpenSearch:**  
+   Envoy sends access logs in JSON format to OpenSearch through Fluent Bit. These logs contain information about the request processed, helping in monitoring and analysis.
 
-### Opensearch
+5. **Alert Triggering:**  
+   OpenSearch processes the access logs, and if any predefined conditions or thresholds are met, it triggers a monitor alert. This alert is sent as a notification to an alerting API, including information about the severity of the alert and the user's spiffeID.
 
-### Fluent Bit
+6. **Alert Handling and Database Update:**  
+   The Alerting API processes the notification and updates the relevant information in the Redis database. To update the Redis database, the API sends an HTTPS request to Envoy, which downgrades the connection from HTTPS to HTTP and forwards the request to Webdis. Envoy acts as a reverse proxy in this scenario.
 
-### Envoy
+This flow ensures secure access, request rate limiting, logging, and monitoring with automatic updates based on alerts.
 
 ## Authors
 
