@@ -135,7 +135,7 @@ docker-compose up -d
    Even though you can set the custom webhook to send an HTTP request with `Content-Type: application/json`, OpenSearch just sends the message as the body, so you must set the json yourself.
 
    Example trigger alert message:
-   ```json
+   ```mustache
    {
      "alerts": [
        {{#ctx.newAlerts}}
