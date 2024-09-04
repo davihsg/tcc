@@ -1,0 +1,14 @@
+{
+  "alerts": [
+    {
+      "type": "query",
+      "monitor_name": "{{ctx.monitor.name}}",
+      "severity": {{ctx.trigger.severity}},
+      "period_start": "{{ctx.periodStart}}",
+      "period_end": "{{ctx.periodEnd}}",
+      "trigger_name": "{{ctx.trigger.name}}",
+      "trigger_severity": {{ctx.trigger.severity}},
+      "global_scope": true
+    }
+  ]
+}
