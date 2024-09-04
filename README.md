@@ -70,7 +70,7 @@ docker-compose up -d
 
    Example `curl` command:
    ```bash
-   curl -X PUT "http://opensearch:9200/envoy-alerts" -H 'Content-Type: application/json' -d'
+   curl -X PUT "http://opensearch:9200/envoy_alerts" -H 'Content-Type: application/json' -d'
    {
      "mappings": {
        "properties": {
@@ -96,7 +96,7 @@ docker-compose up -d
        "config_type": "webhook",
        "is_enabled": true,
        "webhook": {
-         "url": "http://alerting:31415/alert",
+         "url": "http://envoy:31415/alert",
          "header_params": {
            "Content-Type": "application/json"
          },
@@ -202,7 +202,7 @@ docker-compose up -d
    The [lua script](https://github.com/davihsg/tcc/blob/main/envoy/lua/ratelimit.lua) just gets the value from two keys: the spiffe id, and a global key. If either one of them is greater than 0, meaning that there is an ongoing alert, Envoy returns 429 - Too Many Requests - immediatly. Otherwise, the request is processed normally.
 
 3. **Set Up Dedicated Alert listener**
-   - Add a listener in Envoy that handles alert notification from opensearch. The notification is going to be processed by a Lua script, which will update information on the Webdis + Redis container and also with Opensearch for auditing. Both Webdis cluster and Opensearch cluster must be created.
+   - Add a listener in Envoy that handles alert notifications from OpenSearch. When Envoy receives a notification, it triggers a Lua script to process the alert. This script updates information in the Webdis + Redis container, ensuring that the user's rate limiting or other access control data is adjusted based on the alert. Additionally, the script updates OpenSearch for auditing purposes, maintaining a record of the changes. To support this functionality, both the Webdis cluster and the OpenSearch cluster must be created and configured.
 
    Example:
    ```yaml
