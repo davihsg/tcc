@@ -21,10 +21,7 @@ Here's a brief explanation of each step in the flow:
 4. **Logging to OpenSearch:**  
    Envoy sends access logs in JSON format to OpenSearch through Fluent Bit. These logs contain information about the request processed, helping in monitoring and analysis.
 
-5. **Alert Triggering:**  
-   OpenSearch processes the access logs, and if any predefined conditions or thresholds are met, it triggers a monitor alert. This alert is sent as a notification to Envoy, including information about the severity of the alert and the user's spiffeID.
-
-5. **Log Processing and Alerting**
+5. **Log Processing and Alerting:**
    Once the logs are stored in OpenSearch, they are analyzed. If any predefined conditions are met (e.g., exceeding request limits or unusual access patterns), an alert is triggered. This alert system is part of a monitoring mechanism in OpenSearch. When triggered, a notification is sent back to the Envoy instance.
 
 6. **Alert Processing:**  
