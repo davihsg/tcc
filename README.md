@@ -22,10 +22,13 @@ Here's a brief explanation of each step in the flow:
    Envoy sends access logs in JSON format to OpenSearch through Fluent Bit. These logs contain information about the request processed, helping in monitoring and analysis.
 
 5. **Alert Triggering:**  
-   OpenSearch processes the access logs, and if any predefined conditions or thresholds are met, it triggers a monitor alert. This alert is sent as a notification to an alerting API, including information about the severity of the alert and the user's spiffeID.
+   OpenSearch processes the access logs, and if any predefined conditions or thresholds are met, it triggers a monitor alert. This alert is sent as a notification to Envoy, including information about the severity of the alert and the user's spiffeID.
 
-6. **Alert Handling:**  
-   The Alerting API processes the notification and updates the relevant information in the Redis database. To update the Redis database, the API sends an HTTPS request to Envoy, which downgrades the connection from HTTPS to HTTP and forwards the request to Webdis. Envoy acts as a reverse proxy in this scenario.
+5. **Log Processing and Alerting**
+   Once the logs are stored in OpenSearch, they are analyzed. If any predefined conditions are met (e.g., exceeding request limits or unusual access patterns), an alert is triggered. This alert system is part of a monitoring mechanism in OpenSearch. When triggered, a notification is sent back to the Envoy instance.
+
+6. **Alert Processing:**  
+   Envoy has a dedicated listener to process the alert notifications. When Envoy receives an alert, another Lua script is executed. This script updates the user's information stored in the Webdis + Redis container. These updates may include modifying the rate limit status or flagging specific users based on the alert details, allowing for dynamic adjustments to user access in response to system conditions.
 
 This flow ensures secure access, request rate limiting, logging, and monitoring with automatic updates based on alerts.
 
@@ -134,34 +137,34 @@ docker-compose up -d
 
    Even though you can set the custom webhook to send an HTTP request with `Content-Type: application/json`, OpenSearch just sends the message as the body, so you must set the json yourself.
 
-   Example trigger alert message:
+   Example trigger alert message for bucket monitors:
    ```mustache
    {
      "alerts": [
        {{#ctx.newAlerts}}
        {
-         "id": "{{id}}",
-         "spiffe_id": "{{bucket_keys}}",
+         "type" : "bucket",
+         "key": "{{bucket_keys}}",
          "monitor_name": "{{ctx.monitor.name}}",
-         "severity": {{ctx.trigger.severity}},
+         "trigger_name": "{{ctx.trigger.name}}",
+         "trigger_severity": {{ctx.trigger.severity}},
          "period_start": "{{ctx.periodStart}}",
          "period_end": "{{ctx.periodEnd}}",
-         "state": "ACTIVE",
          "global_scope": false
        },
        {{/ctx.newAlerts}}
-       {{#ctx.completedAlerts}}
+       {{#ctx.dedupedAlerts}}
        {
-         "id": "{{id}}",
-         "spiffe_id": "{{bucket_keys}}",
+         "type" : "bucket",
+         "key": "{{bucket_keys}}",
          "monitor_name": "{{ctx.monitor.name}}",
-         "severity": {{ctx.trigger.severity}},
+         "trigger_name": "{{ctx.trigger.name}}",
+         "trigger_severity": {{ctx.trigger.severity}},
          "period_start": "{{ctx.periodStart}}",
          "period_end": "{{ctx.periodEnd}}",
-         "state": "COMPLETED",
          "global_scope": false
        },
-       {{/ctx.completedAlerts}}
+       {{/ctx.dedupedAlerts}}
        null
      ]
    }
@@ -201,18 +204,18 @@ docker-compose up -d
 
    The [lua script](https://github.com/davihsg/tcc/blob/main/envoy/lua/ratelimit.lua) just gets the value from two keys: the spiffe id, and a global key. If either one of them is greater than 0, meaning that there is an ongoing alert, Envoy returns 429 - Too Many Requests - immediatly. Otherwise, the request is processed normally.
 
-3. **Set Up HTTPS to HTTP Proxying for Webdis:**
-   - Add a listener in Envoy that downgrades incoming HTTPS requests to HTTP, forwarding them to the Webdis cluster. Ensure that only the necessary routes are exposed and protected. Set up a transport socker as you wish.
+3. **Set Up Dedicated Alert listener**
+   - Add a listener in Envoy that handles alert notification from opensearch. The notification is going to be processed by a Lua script, which will update information on the Webdis + Redis container and also with Opensearch for auditing. Both Webdis cluster and Opensearch cluster must be created.
 
    Example:
    ```yaml
    listener:
    ...
-    - name: webdis
+    - name: alert
       address:
         socket_address:
           address: 0.0.0.0
-          port_value: 8379
+          port_value: 31415
       filter_chains:
         - filters:
             - name: envoy.filters.network.http_connection_manager
@@ -225,24 +228,28 @@ docker-compose up -d
                 route_config:
                   name: route
                   virtual_hosts:
-                    - name: webdis
+                    - name: alert
                       domains: ["*"]
                       routes:
                         - match:
-                            safe_regex:
-                              regex: "/(GET|INCR|DECR)/spiffe:%2F%2Fdhsg.com%2F[^/]+$"
-                          route:
-                            cluster: webdis
-                        - match:
-                            safe_regex:
-                              regex: "/(GET|INCR|DECR)/global_scope"
-                          route:
-                            cluster: webdis
-       http_filters:
-        - name: envoy.filters.http.router
-          typed_config:
-            "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-
+                            path: "/alert"
+                            headers:
+                              name: ":method"
+                              string_match:
+                                exact: "POST"
+                          direct_response:
+                            status: 200
+                            body:
+                              inline_string: "alerts processed"
+                http_filters:
+                  - name: envoy.filters.http.lua
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                      default_source_code:
+                        filename: /etc/lua/alert.lua
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
     ...
 
    cluster:
@@ -258,7 +265,23 @@ docker-compose up -d
                     socket_address:
                       address: webdis
                       port_value: 7379
-
+    - name: opensearch
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          sni: opensearch
+      load_assignment:
+        cluster_name: opensearch
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: opensearch
+                      port_value: 9200
    ```
 
 ### Step 4: Accessing the API
