@@ -9,23 +9,17 @@ This repository presents a simple, yet sophisticated, implementation of access c
 
 Here's a brief explanation of each step in the flow:
 
-1. **User Request:**  
-   An authenticated user sends a request to the Envoy proxy, including its SVID certificate for identification and authentication. The SVID helps in determining the user's identity securely.
+1. **User Request:** An authenticated user sends a request to the Envoy proxy, including its SVID certificate for identification and authentication. The SVID helps in determining the user's identity securely.
 
-2. **Rate limiting check:**  
-   Envoy runs a Lua script to check if the user has reached a predefined request limit. It does this by fetching information from a Redis database, using Webdis as an intermediary. Webdis is employed because Envoy's Lua library supports HTTP/HTTPS natively, not TCP, making it necessary to access Redis in this manner. If the user hasn't exceeded the limit, Envoy processes the request normally. If the limit is exceeded, Envoy returns a `429 Too Many Requests` response to the user.
+2. **Rate limiting check:** Envoy runs a Lua script to check if the user has reached a predefined request limit. It does this by fetching information from a Redis database, using Webdis as an intermediary. Webdis is employed because Envoy's Lua library supports HTTP/HTTPS natively, not TCP, making it necessary to access Redis in this manner. If the user hasn't exceeded the limit, Envoy processes the request normally. If the limit is exceeded, Envoy returns a `429 Too Many Requests` response to the user.
 
-3. **Forwarding to API:**  
-   If the request is valid and within the allowed limit, Envoy forwards it to the API for further processing.
+3. **Forwarding to API:** If the request is valid and within the allowed limit, Envoy forwards it to the API for further processing.
 
-4. **Logging to OpenSearch:**  
-   Envoy sends access logs in JSON format to OpenSearch through Fluent Bit. These logs contain information about the request processed, helping in monitoring and analysis.
+4. **Logging to OpenSearch:** Envoy sends access logs in JSON format to OpenSearch through Fluent Bit. These logs contain information about the request processed, helping in monitoring and analysis.
 
-5. **Log Processing and Alerting:**
-   Once the logs are stored in OpenSearch, they are analyzed. If any predefined conditions are met (e.g., exceeding request limits or unusual access patterns), an alert is triggered. This alert system is part of a monitoring mechanism in OpenSearch. When triggered, a notification is sent back to the Envoy instance.
+5. **Log Processing and Alerting:** Once the logs are stored in OpenSearch, they are analyzed. If any predefined conditions are met (e.g., exceeding request limits or unusual access patterns), an alert is triggered. This alert system is part of a monitoring mechanism in OpenSearch. When triggered, a notification is sent back to the Envoy instance.
 
-6. **Alert Processing:**  
-   Envoy has a dedicated listener to process the alert notifications. When Envoy receives an alert, another Lua script is executed. This script updates the user's information stored in the Webdis + Redis container. These updates may include modifying the rate limit status or flagging specific users based on the alert details, allowing for dynamic adjustments to user access in response to system conditions.
+6. **Alert Processing:** Envoy has a dedicated listener to process the alert notifications. When Envoy receives an alert, another Lua script is executed. This script updates the user's information stored in the Webdis + Redis container. These updates may include modifying the rate limit status or flagging specific users based on the alert details, allowing for dynamic adjustments to user access in response to system conditions.
 
 This flow ensures secure access, request rate limiting, logging, and monitoring with automatic updates based on alerts.
 
