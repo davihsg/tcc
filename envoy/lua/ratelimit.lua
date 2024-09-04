@@ -1,31 +1,93 @@
 JSON = (loadfile("/var/lib/lua/JSON.lua"))()
 
-local webdis_cluster = "webdis"
+WEBDIS_CLUSTER = "webdis"
+GLOBAL_KEY = "global"
+BITS = 33
+OFFSET = 60 -- in seconds
 
-local function get_path(spiffe_id)
-	local path = "/MGET/" .. spiffe_id:gsub("/", "%%2F") .. "/global_scope"
+local function url_encode(str)
+	if str then
+		str = string.gsub(str, "\n", "\r\n")
+		str = string.gsub(str, "([^%w%-%.%_%~])", function(c)
+			return string.format("%%%02X", string.byte(c))
+		end)
+	end
+	return str
+end
 
-	return path
+local function tobin(n)
+	n = math.floor(n)
+
+	local bin = ""
+
+	for _ = 1, BITS do
+		local r = n % 2
+		n = math.floor(n / 2)
+		bin = r .. bin
+	end
+
+	return bin
+end
+
+local function generate_redis_script()
+	local script = [[
+local set1 = KEYS[1]
+local set2 = KEYS[2]
+local start = KEYS[3]
+
+redis.call("ZREMRANGEBYLEX", set1, "[00000000000000000000000000000000000", "(" .. start)
+redis.call("ZREMRANGEBYLEX", set2, "[00000000000000000000000000000000000", "(" .. start)
+
+local set1_members = redis.call("ZRANGE", set1, 0, -1, "WITHSCORES")
+local set2_members = redis.call("ZRANGE", set2, 0, -1, "WITHSCORES")
+
+local set1_sum = 0
+for i = 2, #set1_members, 2 do
+	set1_sum = set1_sum + tonumber(set1_members[i])
+end
+
+local set2_sum = 0
+for i = 2, #set2_members, 2 do
+	set2_sum = set2_sum + tonumber(set2_members[i])
+end
+
+return {
+	set1_sum,
+	set2_sum,
+}
+]]
+
+	return script
 end
 
 function envoy_on_request(request_handle)
 	local uris = request_handle:streamInfo():downstreamSslConnection():uriSanPeerCertificate()
 
-	local spiffe_id = uris[1]
+	local key = uris[1] -- spiffe_id
 
-	local path = get_path(spiffe_id)
+	local start = tobin(os.time() - OFFSET)
+	local script = generate_redis_script()
 
-	local headers, body = request_handle:httpCall(webdis_cluster, {
+	local path = "/EVAL/"
+		.. url_encode(script)
+		.. "/3/"
+		.. url_encode(key)
+		.. "/"
+		.. url_encode(GLOBAL_KEY)
+		.. "/"
+		.. start
+
+	local headers, body = request_handle:httpCall(WEBDIS_CLUSTER, {
 		[":method"] = "GET",
 		[":path"] = path,
-		[":authority"] = webdis_cluster,
+		[":authority"] = WEBDIS_CLUSTER,
 	}, "", 1000)
 
 	if headers[":status"] == "200" then
 		local data = JSON:decode(body)
 
-		local alerts = tonumber(data["MGET"][1]) or 0
-		local global_scope = tonumber(data["MGET"][2]) or 0
+		local alerts = tonumber(data["EVAL"][1]) or 0
+		local global_scope = tonumber(data["EVAL"][2]) or 0
 
 		if global_scope > 0 then
 			local response = {

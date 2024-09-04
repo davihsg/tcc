@@ -2,28 +2,28 @@
   "alerts": [
     {{#ctx.newAlerts}}
     {
-      "id": "{{id}}",
-      "spiffe_id": "{{bucket_keys}}",
+      "type" : "bucket",
+      "key": "{{bucket_keys}}",
       "monitor_name": "{{ctx.monitor.name}}",
-      "severity": {{ctx.trigger.severity}},
+      "trigger_name": "{{ctx.trigger.name}}",
+      "trigger_severity": {{ctx.trigger.severity}},
       "period_start": "{{ctx.periodStart}}",
       "period_end": "{{ctx.periodEnd}}",
-      "state": "ACTIVE",
       "global_scope": false
     },
     {{/ctx.newAlerts}}
-    {{#ctx.completedAlerts}}
+    {{#ctx.dedupedAlerts}}
     {
-      "id": "{{id}}",
-      "spiffe_id": "{{bucket_keys}}",
+      "type" : "bucket",
+      "key": "{{bucket_keys}}",
       "monitor_name": "{{ctx.monitor.name}}",
-      "severity": {{ctx.trigger.severity}},
+      "trigger_name": "{{ctx.trigger.name}}",
+      "trigger_severity": {{ctx.trigger.severity}},
       "period_start": "{{ctx.periodStart}}",
       "period_end": "{{ctx.periodEnd}}",
-      "state": "COMPLETED",
       "global_scope": false
     },
-    {{/ctx.completedAlerts}}
+    {{/ctx.dedupedAlerts}}
     null
   ]
 }
