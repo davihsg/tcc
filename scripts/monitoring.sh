@@ -2,12 +2,12 @@
 
 OPENSEARCH_URL="https://localhost:9200"
 OPENSEARCH_INDEX="containers"
-INTERVAL=30 
+INTERVAL=15 
 
 OPENSEARCH_USER="admin"
 OPENSEARCH_PASS="BkK8[(SdJ*,#&G4g"
 
-CONTAINERS="dummy-api envoy"
+CONTAINERS="dummy-api envoy webdis"
 
 get_docker_stats() {
   docker stats --no-stream --format json $1

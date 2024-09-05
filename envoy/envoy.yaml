@@ -53,6 +53,27 @@ static_resources:
                           route:
                             cluster: api
                 http_filters:
+                  - name: envoy.filters.http.rbac
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.rbac.v3.RBAC
+                      rules:
+                        action: ALLOW
+                        policies:
+                          "admin":
+                            permissions:
+                              - any: true
+                            principals:
+                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/admin"}}
+                          "get_items":
+                            permissions:
+                              - and_rules:
+                                  rules:
+                                    - header: {name: ":method", string_match: {exact: "GET"}}
+                                    - url_path: {path: {prefix: "/items"}}
+                            principals:
+                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/normal"}}
+                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/irregular"}}
+                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/anomalous"}}
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -131,9 +152,6 @@ static_resources:
                             prefix: "/"
                           route:
                             cluster: api
-                            #rate_limits:
-                            #  - actions:
-                            #      - source_cluster: {}
                 http_filters:
                   - name: envoy.filters.http.rbac
                     typed_config:
@@ -153,9 +171,9 @@ static_resources:
                                     - header: {name: ":method", string_match: {exact: "GET"}}
                                     - url_path: {path: {prefix: "/items"}}
                             principals:
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/dummy-user"}}
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/projeto1"}}
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/projeto2"}}
+                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/normal"}}
+                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/irregular"}}
+                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/anomalous"}}
                   - name: envoy.filters.http.lua
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua

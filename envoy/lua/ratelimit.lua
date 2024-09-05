@@ -2,7 +2,7 @@ JSON = (loadfile("/var/lib/lua/JSON.lua"))()
 
 WEBDIS_CLUSTER = "webdis"
 GLOBAL_KEY = "global"
-OFFSET = 60 -- in seconds
+OFFSET = 300 -- in seconds
 
 local function url_encode(str)
 	if str then
