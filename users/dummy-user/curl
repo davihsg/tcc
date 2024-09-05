@@ -1,5 +1,0 @@
-curl --cacert bundle.0.pem --cert svid.0.pem --key svid.0.key "https://192.168.68.138:10000/withoutauth/items" -k
-curl --cacert bundle.0.pem --cert svid.0.pem --key svid.0.key "https://192.168.68.138:10002/items" -k
-curl --cacert bundle.0.pem --cert svid.0.pem --key svid.0.key "https://localhost:10002/items" -k -o /dev/null # dummy-user
-curl --cacert bundle.2.pem --cert svid.2.pem --key svid.2.key "https://localhost:10002/items" -k -o /dev/null # projeto1
-curl --cacert bundle.1.pem --cert svid.1.pem --key svid.1.key "https://localhost:10002/items" -k -o /dev/null # projeto2
