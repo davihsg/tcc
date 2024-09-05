@@ -2,8 +2,8 @@ local set1 = KEYS[1]
 local set2 = KEYS[2]
 local start = KEYS[3]
 
-redis.call("ZREMRANGEBYLEX", set1, "[00000000000000000000000000000000000", "(" .. start)
-redis.call("ZREMRANGEBYLEX", set2, "[00000000000000000000000000000000000", "(" .. start)
+redis.call("ZREMRANGEBYLEX", set1, "[0", "(" .. start)
+redis.call("ZREMRANGEBYLEX", set2, "[0", "(" .. start)
 
 local set1_members = redis.call("ZRANGE", set1, 0, -1, "WITHSCORES")
 local set2_members = redis.call("ZRANGE", set2, 0, -1, "WITHSCORES")

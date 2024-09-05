@@ -5,25 +5,6 @@ OS_CLUSTER = "opensearch"
 OS_TOKEN = "YWRtaW46QmtLOFsoU2RKKiwjJkc0Zw=="
 ALERT_INDEX = "envoy_alerts"
 GLOBAL_KEY = "global"
-BITS = 33
-
-local function iso8601_to_epoch(iso_timestamp)
-	local year, month, day, hour, min, sec = iso_timestamp:match("(%d+)-(%d+)-(%d+)T(%d+):(%d+):(%d+).%d+Z")
-
-	local time_table = {
-		year = tonumber(year),
-		month = tonumber(month),
-		day = tonumber(day),
-		hour = tonumber(hour),
-		min = tonumber(min),
-		sec = tonumber(sec),
-		isdst = false,
-	}
-
-	local epoch_time = os.time(time_table) - os.difftime(os.time(), os.time(os.date("!*t")))
-
-	return math.floor(epoch_time)
-end
 
 local function url_encode(str)
 	if str then
@@ -33,20 +14,6 @@ local function url_encode(str)
 		end)
 	end
 	return str
-end
-
-local function tobin(n)
-	n = math.floor(n)
-
-	local bin = ""
-
-	for _ = 1, BITS do
-		local r = n % 2
-		n = math.floor(n / 2)
-		bin = r .. bin
-	end
-
-	return bin
 end
 
 local function get_penalty(severity)
@@ -83,12 +50,11 @@ function envoy_on_request(request_handle)
 		local key = alert.global_scope and GLOBAL_KEY or alert.key
 		key = url_encode(key)
 
-		local epoch = iso8601_to_epoch(alert.period_end)
-		local bin = tobin(epoch)
+		local start = alert.period_end
 
 		request_handle:httpCall(WEBDIS_CLUSTER, {
 			[":method"] = "GET",
-			[":path"] = "/ZINCRBY/" .. key .. "/" .. penalty .. "/" .. bin,
+			[":path"] = "/ZINCRBY/" .. key .. "/" .. penalty .. "/" .. start,
 			[":authority"] = WEBDIS_CLUSTER,
 		}, "", 1000)
 

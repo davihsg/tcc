@@ -2,7 +2,6 @@ JSON = (loadfile("/var/lib/lua/JSON.lua"))()
 
 WEBDIS_CLUSTER = "webdis"
 GLOBAL_KEY = "global"
-BITS = 33
 OFFSET = 60 -- in seconds
 
 local function url_encode(str)
@@ -15,28 +14,14 @@ local function url_encode(str)
 	return str
 end
 
-local function tobin(n)
-	n = math.floor(n)
-
-	local bin = ""
-
-	for _ = 1, BITS do
-		local r = n % 2
-		n = math.floor(n / 2)
-		bin = r .. bin
-	end
-
-	return bin
-end
-
 local function generate_redis_script()
 	local script = [[
 local set1 = KEYS[1]
 local set2 = KEYS[2]
 local start = KEYS[3]
 
-redis.call("ZREMRANGEBYLEX", set1, "[00000000000000000000000000000000000", "(" .. start)
-redis.call("ZREMRANGEBYLEX", set2, "[00000000000000000000000000000000000", "(" .. start)
+redis.call("ZREMRANGEBYLEX", set1, "[0", "(" .. start)
+redis.call("ZREMRANGEBYLEX", set2, "[0", "(" .. start)
 
 local set1_members = redis.call("ZRANGE", set1, 0, -1, "WITHSCORES")
 local set2_members = redis.call("ZRANGE", set2, 0, -1, "WITHSCORES")
@@ -65,7 +50,10 @@ function envoy_on_request(request_handle)
 
 	local key = uris[1] -- spiffe_id
 
-	local start = tobin(os.time() - OFFSET)
+	local start = os.date("!%Y-%m-%dT%H:%M:%S", os.time() - OFFSET) .. "Z"
+
+	request_handle:logDebug(start)
+
 	local script = generate_redis_script()
 
 	local path = "/EVAL/"
