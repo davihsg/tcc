@@ -1,0 +1,133 @@
+[experiment] starting at Thu Sep  5 17:55:21 UTC 2024
+[experiment] sleeping for 60 seconds
+[experiment] starting normal bot...
+[experiment] starting irregular bot...
+[experiment] sleeping for 240 seconds
+[irregular] Duplicated request sent
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Duplicated request sent
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Duplicated request sent
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Duplicated request sent
+[irregular] Request sent. Got response: 200
+[experiment] starting anomalous bot...
+[experiment] sleeping for 540 seconds
+[anomalous] starting DDoS attack with 10000 requests
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Duplicated request sent
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Duplicated request sent
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Duplicated request sent
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[normal] Request sent. Got response: 200
+[irregular] Request sent. Got response: 200
+[experiment] stoping bots...
+[experiment] sleeping for 60 seconds
+[irregular] stopping...
+[normal] stopping...
+[experiment] done at Thu Sep  5 18:10:21 UTC 2024
