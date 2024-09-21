@@ -3,6 +3,7 @@ JSON = (loadfile("/var/lib/lua/JSON.lua"))()
 WEBDIS_CLUSTER = "webdis"
 GLOBAL_KEY = "global"
 OFFSET = 300 -- in seconds
+PENALTY_LIMIT = 0
 
 local function url_encode(str)
 	if str then
@@ -77,7 +78,7 @@ function envoy_on_request(request_handle)
 		local alerts = tonumber(data["EVAL"][1]) or 0
 		local global_scope = tonumber(data["EVAL"][2]) or 0
 
-		if global_scope > 0 then
+		if global_scope > PENALTY_LIMIT then
 			local response = {
 				message = "The server might be overloaded. Please try again later",
 			}
@@ -85,7 +86,7 @@ function envoy_on_request(request_handle)
 			request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
 		end
 
-		if alerts > 0 then
+		if alerts > PENALTY_LIMIT then
 			local response = {
 				message = "You have exceeded your request limit. Please wait before making further requests.",
 			}

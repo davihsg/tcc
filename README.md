@@ -31,7 +31,7 @@ Ensure you have Docker and Docker Compose installed on your system. If not, you 
 
 ### 1. SPIRE Server Setup
 
-### 1.1. CA Certificates and SPIRE Server Setup
+#### 1.1. CA Certificates and SPIRE Server Setup
 
 Before we integrate SPIRE with Envoy, you need to ensure that the **CA certificates** and **SPIRE server** are set up. SPIRE will handle issuing and managing **SPIFFE IDs**, which Envoy will use for mutual TLS authentication.
 
@@ -122,14 +122,14 @@ Here’s how to integrate SPIRE and Envoy using the provided configurations.
 
 Every component of the system is running on a docker container, except for the SPIRE instances. Docker Compose is ideal for this setup because of its built-in DNS, which simplifies communication between services.
 
-1. Networks
+1. **Networks**
 
     The system is organized into two networks: 
 
     - **webdis** (includes Envoy and Webdis containers)
     - **world** (includes OpenSearch, Envoy, API, and Fluent Bit)
 
-2. Containers
+2. **Containers**
 
     The system has six containers:
 
@@ -140,7 +140,7 @@ Every component of the system is running on a docker container, except for the S
     - **envoy** to handle communication between components;
     - **webdis (+ redis)** for storing data and fetching Redis via HTTP;
 
-3. Volumes
+3. **Volumes**
 
     There is only one volume:
 
@@ -158,7 +158,7 @@ docker-compose up -d
 
 Modify Envoy’s configuration to include a listener filter that outputs logs in JSON format. This ensures that Fluent Bit can easily parse and forward these logs to OpenSearch.
 
-The log must contain a `spiffe_id` field. See this [example](https://github.com/davihsg/tcc/blob/main/envoy/envoy.yaml#L122). Adding useful information such as listener and duration is really useful since you can create different monitors with them. It is strongly recommended checking the [example](https://github.com/davihsg/tcc/blob/main/envoy/envoy.yaml#L122).
+The log must contain a `spiffe_id` field. See this [example](https://github.com/davihsg/tcc/blob/main/envoy/envoy.yaml#L122). Adding useful information such as listener and duration is really useful since you can create different monitors with them. Check the example for more information.
 
 Example:
 ```yaml
@@ -175,7 +175,7 @@ Example:
 
 #### 3.2. Add Lua Script for Rate Limiting
 
-On the API listener, add an HTTP Lua filter that runs the `ratelimit.lua` script. This script will handle checking the rate limits by querying the Redis database via Webdis.
+On the API listener, add an HTTP Lua filter that runs the `ratelimit.lua` script. The script will check the rate limits by querying the Redis database via Webdis.
 
 Example:
 ```yaml
@@ -186,15 +186,17 @@ Example:
      filename: /etc/lua/ratelimit.lua
 ```
 
-The [lua script](https://github.com/davihsg/tcc/blob/main/envoy/lua/ratelimit.lua) just gets the value from two keys: the spiffe id, and a global key. If either one of them is greater than 0, meaning that there is an ongoing alert, Envoy returns `429 - Too Many Requests` - immediatly. Otherwise, the request is processed normally.
+The [lua script](https://github.com/davihsg/tcc/blob/main/envoy/lua/ratelimit.lua) just gets the value from two keys: the spiffe id, and a global key. If either one of them is greater than `PENALTY_LIMIT`, meaning that there are an ongoing alerts, Envoy returns `429 - Too Many Requests` - immediatly. Otherwise, the request is processed normally. You can set the `PENALTY_LIMIT` on the script, the default is 0.
 
 The script works as a time window accumulator that checks the sum of penalty for a SPIFFE ID, and also ongoing problems for the system. First, it removes entries less than `current_time - OFFSET`, then returns the sum of the remaining values. This not only cleans the entries on Redis, but also protects a user from running into a deadlock. Define the `OFFSET` variable with the time you want.
 
 #### 3.3. Set Up Dedicated Alert listener
 
-Add a listener in Envoy that handles alert notifications from OpenSearch. When Envoy receives a notification, it triggers a Lua script to process the alert. This script updates information in the Webdis + Redis container, ensuring that the user's rate limiting or other access control data is adjusted based on the alert.
+Add a listener in Envoy that handles alert notifications from OpenSearch.
 
-There are two types of alerts: user alerts and global alerts. User alerts are the ones which were caused because of the user resources, such as `too many requests` and `high request duration sum`. While global alerts are the ones related to global resources, such as `high upstream service cpu usage`.
+When Envoy receives a notification, it triggers a Lua script to process the alert. This script updates information in the Webdis + Redis container, ensuring that the user's rate limiting or other access control data is adjusted based on the alert.
+
+There are two types of alerts: user alerts and global alerts. User alerts are the ones which related to users resources, such as `too many requests` and `high request duration sum`. While global alerts are the ones related to global resources, such as `high upstream service cpu usage`.
 
 Each alert has a severity level going from 1 (highest) to 5 (lowest). You can define the penalty for each level on the script `alert.lua`.
 
@@ -324,7 +326,7 @@ curl --cacert certs/ca.crt -X PUT "http://opensearch:9200/envoy_alerts" -H 'Cont
 
 Set up a custom webhook in OpenSearch to communicate with the Envoy.
 
-The webhook should be configured with the Envoy URL. It should like this:
+The webhook should be configured with the Envoy Alert Handler URL. It should like this:
 
 ```json
 {
@@ -349,7 +351,7 @@ The webhook should be configured with the Envoy URL. It should like this:
 
 #### 4.4. Create Monitors and Triggers
 
-1. Monitors
+1. **Monitors**
 
     In OpenSearch, create monitors to watch the logs and generate alerts based on specific conditions.
 
@@ -357,7 +359,7 @@ The webhook should be configured with the Envoy URL. It should like this:
 
     There are two primary types of monitors: bucket and query monitors. With bucket ones, you can aggregate metrics based on a key and an alert will be triggered for each key. With query ones, you can specific a query and an alert will be triggered based on a defined threshold.
 
-2. Triggers
+2. **Triggers**
 
     Create triggers for the monitors. Documentation is quite scarce in this area, so you should opt to create them using an `extraction query` or via `curl`. Here is an [example](https://github.com/davihsg/tcc/tree/main/opensearch/monitors/trigger_condition.json) of how its condition should look like.
 
