@@ -426,7 +426,7 @@ spire-agent api fetch x509 -write .
 curl --cacert bundle.0.pem --cert svid.0.pem --key svid.0.key "https://localhost:10002/items" -k
 ```
 
-Curl doesn't support HTTPS where the upstream certificate doesn't have CommonName, and SPIRE certificates only have Country, Organization and Serial Number fields. Therefore, the flag `-k` should be passed to `curl`.
+`curl` doesn't support HTTPS when the upstream certificate doesn't have CommonName, and SPIRE certificates only have Country, Organization and Serial Number fields. Therefore, the flag `-k` should be passed to `curl`.
 
 ## Authors
 
