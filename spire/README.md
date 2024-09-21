@@ -137,7 +137,3 @@ The user can fetch its certs by running the command:
 ```bash
 spire-agent api fetch x509 -write .
 ```
-
-Now it can communicate with Envoy properly.
-
-## Next Steps
