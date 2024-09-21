@@ -149,10 +149,12 @@ Every component of the system is running on a docker container, except for the S
 To start all containers, simple run:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 3. Ingest Envoy Access Log into Opensearch
+
+By running `docker compose up -d`, this step is already configured, but read it to understand and to change where is needed.
 
 #### 3.1. Configure Listener for Access Logs
 
