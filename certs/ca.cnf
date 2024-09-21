@@ -1,0 +1,23 @@
+[ req ]
+default_bits        = 256
+default_keyfile     = ca.key
+distinguished_name  = req_distinguished_name
+x509_extensions     = v3_ca
+prompt              = no
+
+[ req_distinguished_name ]
+C  = BR
+ST = Paraiba
+L  = Campina Grande
+O  = Universidade Federal de Campina Grande
+OU = TCC
+CN = dhsg.com # Trust domain
+
+[ v3_ca ]
+subjectKeyIdentifier    = hash
+basicConstraints        = critical, CA:TRUE
+keyUsage                = critical, Certificate Sign, CRL Sign
+subjectAltName          = @alt_names
+
+[ alt_names ]
+DNS.1 = dhsg.com

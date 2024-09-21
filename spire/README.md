@@ -9,7 +9,9 @@ The example below is intended to be running on Linux. Check [SPIRE's documentati
 
 ## Running
 
-### Installing SPIRE
+## Prerequisites
+
+First of all, install spire on your machine:
 
 ```bash
 $ curl -s -N -L https://github.com/spiffe/spire/releases/download/v1.10.0/spire-1.10.0-linux-amd64-musl.tar.gz | tar xz
@@ -18,22 +20,36 @@ $ curl -s -N -L https://github.com/spiffe/spire/releases/download/v1.10.0/spire-
 Once you have downloaded, add SPIRE binaries to your path:
 
 ```bash
-$ export PATH="$PATH:$HOME/spire-1.10.0/bin"
+$ export PATH="$PATH:$(pwd)/spire-1.10.0/bin"
 ```
 
-To have binaries accessible on every bash sessions, add the command above to your `.bashrc` file and restart the session with `source ~/.bashrc`. It is really useful.
+To have binaries accessible on every bash session, add the command above to your `.bashrc` file and restart the session with `source ~/.bashrc`. It is really useful.
 
-### Starting SPIRE Server
-
-Checkout our SPIRE Server configuration example [example](https://github.com/davihsg/tcc/blob/main/spire/conf/server/server.conf) before starting the server.
-
-Use the trust domain as you wish, on this example, I am using `dhsg.com`.
+Then, navigate to this directory:
 
 ```bash
-$ spire-server run -config conf/server/server.conf &
+cd spire 
 ```
 
-### Starting SPIRE Agent
+## 1. Starting SPIRE Server
+
+Checkout our SPIRE Server configuration [example](https://github.com/davihsg/tcc/blob/main/spire/conf/server/server.conf) before starting the server.
+
+Remember, the trust domain will be the same for all components. This example uses `dhsg.com`, if you are using another one, change it on `server.conf`.
+
+Now, simply run:
+
+```bash
+spire-server run -config conf/server/server.conf &
+```
+
+Verify the server health:
+
+```bash
+spire-server healthcheck
+```
+
+## 2. Starting SPIRE Agent
 
 Before running the SPIRE Agent, the server must ensure its identity. To do so, you must create a join token for it:
 
@@ -53,13 +69,11 @@ Here is an example of how it should look like:
 agent {
     data_dir = "./data/agent"
     log_level = "DEBUG"
-    trust_domain = "dhsg.com"       # Must be the same as the SPIRE Server one
-    server_address = "localhost"    # SPIRE Server address
-    server_port = 8081              # SPIRE Server port
+    trust_domain = "dhsg.com" # trust domain
+    server_address = "localhost"
+    server_port = 8081
 
-    # Insecure bootstrap is NOT appropriate for production use but is ok for 
-    # simple testing/evaluation purposes.
-    insecure_bootstrap = true
+    trust_bundle_path = "../certs/ca.crt" # path to CA bundle
 }
 
 plugins {
@@ -83,31 +97,40 @@ plugins {
 }
 ```
 
+Remember, SPIRE Agent and Server' trust domain must be the same.
+
+
 Now, just start the SPIRE Agent:
 
 ```bash
 $ bin/spire-agent run -config conf/agent/agent.conf -joinToken <token_string> &
 ```
 
-### Create a registration policy for Envoy
+Verify the agent health:
 
-Envoy is identified based on its image id.
+```bash
+spire-agent healthcheck
+```
+
+## 3. Create registration policies
+
+### 3.1. Envoy
+
+Envoy is identified based on its docker image id.
 
 ```bash
 spire-server entry create -parentID spiffe://dhsg.com/agent \
     -spiffeID spiffe://dhsg.com/envoy-api -selector docker:image_id:envoyproxy/envoy:contrib-v1.29.1
 ```
 
-### Create a registration policy for the User
+### 3.2. Users
 
-A user is identified based on its unix id.
+An user is identified based on its unix id.
 
 ```bash
 spire-server entry create -parentID spiffe://dhsg.com/agent \
     -spiffeID spiffe://dhsg.com/dummy-user -selector unix:uid:$(id -u)
 ```
-
-### Fetching x509-SVID
 
 The user can fetch its certs by running the command:
 
@@ -116,3 +139,5 @@ spire-agent api fetch x509 -write .
 ```
 
 Now it can communicate with Envoy properly.
+
+## Next Steps

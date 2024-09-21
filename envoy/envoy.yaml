@@ -1,5 +1,5 @@
 node:
-  id: default
+  id: server
   cluster: server
 static_resources:
   listeners:

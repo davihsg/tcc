@@ -5,11 +5,14 @@ services:
     image: opensearchproject/opensearch:2.16.0
     environment:
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=BkK8[(SdJ*,#&G4g
-      - discovery.type=single-node
       - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
     volumes:
       - opensearch-data:/usr/share/opensearch/data
+      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - ./certs/ca.crt:/usr/share/opensearch/config/ca.crt
+      - ./certs/opensearch.crt:/usr/share/opensearch/config/opensearch.crt
+      - ./certs/opensearch.key:/usr/share/opensearch/config/opensearch.key
     ulimits:
       memlock:
         soft: -1
@@ -45,7 +48,7 @@ services:
       - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf
       - ./fluent-bit/envoy.conf:/fluent-bit/etc/envoy.conf
-      - ./fluent-bit/containers.conf:/fluent-bit/etc/containers.conf
+      - ./certs/ca.crt:/fluent-bit/opt/certs/ca.crt
     depends_on:
       - opensearch
     networks:
@@ -69,7 +72,7 @@ services:
       - "10000:10000"
       - "10002:10002"
       - "11111:31415"
-    command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "-l", "debug"]
+    command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "-l", "info"]
     depends_on:
       - fluent-bit
       - dummy-api

@@ -92,5 +92,11 @@ function envoy_on_request(request_handle)
 
 			request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
 		end
+	else
+		local response = {
+			message = "The server might be overloaded. Please try again later",
+		}
+
+		request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
 	end
 end
