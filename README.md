@@ -3,6 +3,16 @@
 
 This repository presents a simple, yet sophisticated, implementation of access control using Envoy Proxy and Opensearch.
 
+## Motivation
+
+The rise in popularity of microservices architecture and the emergence of companies providing Infrastructure as a Service (IaaS), Platform as a Service (PaaS), and Software as a Service (SaaS), such as AWS, Vercel, and Azure, have completely transformed the typical system architecture. Previously, systems were housed in large, well-protected data centers. Now, the system components are distributed across different clusters maintained by third-party companies. This paradigm shift has introduced new challenges for computer science, particularly in ensuring the confidentiality and integrity of applications.
+
+In this scenario, traditional security models are unfeasible or unable to protect the system against more sophisticated attacks. It is not trivial to define the security perimeter when services are distributed across multiple providers, and even when it is done, once inside the internal network, an attacker can move laterally, harvest credentials, and escalate their access level.
+
+From this need for more sophisticated and dynamic security models capable of handling the increasing complexity of systems, the Zero Trust (ZT) paradigm emerges. ZT is a set of principles and ideas that minimize uncertainty through least privilege access policies.
+
+This work explores the integration of three open-source tools, SPIRE, Envoy, and OpenSearch, to implement an Attribute-Based Access Control (ABAC) system following the principles of Zero Trust (ZT). In this system, SPIRE identifies the entities, and Envoy's access logs are processed by OpenSearch. The system is based on a penalty mechanism, where the behavior of entities and the attributes of resources determine the access decision policy.
+
 ## Architecture Overview
 
 ![architecture-overview](https://github.com/davihsg/tcc/raw/main/assets/architecture-overview.png)
