@@ -62,7 +62,9 @@ services:
       - ./envoy/lua/ratelimit.lua:/etc/lua/ratelimit.lua
       - ./envoy/lua/alert.lua:/etc/lua/alert.lua
       - ./envoy/lua/lib:/var/lib/lua
-      - /tmp/spire-agent/public:/tmp/spire-agent/public
+      - ./certs/envoy.crt:/etc/envoy/certs/envoy.crt
+      - ./certs/envoy.key:/etc/envoy/certs/envoy.key
+      - ./certs/ca.crt:/etc/envoy/certs/ca.crt
     logging:
       driver: "fluentd"
       options:

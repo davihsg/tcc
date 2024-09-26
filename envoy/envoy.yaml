@@ -53,27 +53,6 @@ static_resources:
                           route:
                             cluster: api
                 http_filters:
-                  - name: envoy.filters.http.rbac
-                    typed_config:
-                      "@type": type.googleapis.com/envoy.extensions.filters.http.rbac.v3.RBAC
-                      rules:
-                        action: ALLOW
-                        policies:
-                          "admin":
-                            permissions:
-                              - any: true
-                            principals:
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/admin"}}
-                          "get_items":
-                            permissions:
-                              - and_rules:
-                                  rules:
-                                    - header: {name: ":method", string_match: {exact: "GET"}}
-                                    - url_path: {path: {prefix: "/items"}}
-                            principals:
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/normal"}}
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/irregular"}}
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/anomalous"}}
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -83,26 +62,14 @@ static_resources:
               "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
               require_client_certificate: true
               common_tls_context:
-                tls_certificate_sds_secret_configs:
-                  - name: spiffe://dhsg.com/envoy-api
-                    sds_config:
-                      resource_api_version: V3
-                      api_config_source:
-                        api_type: GRPC
-                        transport_api_version: V3
-                        grpc_services:
-                          envoy_grpc:
-                            cluster_name: spire_agent
-                validation_context_sds_secret_config:
-                  name: "spiffe://dhsg.com"
-                  sds_config:
-                    resource_api_version: V3
-                    api_config_source:
-                      api_type: GRPC
-                      transport_api_version: V3
-                      grpc_services:
-                        envoy_grpc:
-                          cluster_name: spire_agent
+                tls_certificates:
+                  - certificate_chain:
+                      filename: "/etc/envoy/certs/envoy.pem"
+                    private_key:
+                      filename: "/etc/envoy/certs/envoy.pem"
+                validation_context:
+                  trusted_ca:
+                    filename: "/etc/envoy/certs/ca.pem"
     - name: ratelimit
       address:
         socket_address:
@@ -139,7 +106,7 @@ static_resources:
                           request_id: "%REQ(X-REQUEST-ID)%"
                           authority: "%REQ(:AUTHORITY)%"
                           upstream_host: "%UPSTREAM_HOST%"
-                          spiffe_id: "%DOWNSTREAM_PEER_URI_SAN%"
+                          uri: "%DOWNSTREAM_PEER_URI_SAN%"
                           listener: "with_auth"
                           downstream_remote_address: "%DOWNSTREAM_REMOTE_ADDRESS%"
                 route_config:
@@ -153,27 +120,6 @@ static_resources:
                           route:
                             cluster: api
                 http_filters:
-                  - name: envoy.filters.http.rbac
-                    typed_config:
-                      "@type": type.googleapis.com/envoy.extensions.filters.http.rbac.v3.RBAC
-                      rules:
-                        action: ALLOW
-                        policies:
-                          "admin":
-                            permissions:
-                              - any: true
-                            principals:
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/admin"}}
-                          "get_items":
-                            permissions:
-                              - and_rules:
-                                  rules:
-                                    - header: {name: ":method", string_match: {exact: "GET"}}
-                                    - url_path: {path: {prefix: "/items"}}
-                            principals:
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/normal"}}
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/irregular"}}
-                              - authenticated: {principal_name: {exact: "spiffe://dhsg.com/anomalous"}}
                   - name: envoy.filters.http.lua
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
@@ -188,26 +134,14 @@ static_resources:
               "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
               require_client_certificate: true
               common_tls_context:
-                tls_certificate_sds_secret_configs:
-                  - name: spiffe://dhsg.com/envoy-api
-                    sds_config:
-                      resource_api_version: V3
-                      api_config_source:
-                        api_type: GRPC
-                        transport_api_version: V3
-                        grpc_services:
-                          envoy_grpc:
-                            cluster_name: spire_agent
-                validation_context_sds_secret_config:
-                  name: "spiffe://dhsg.com"
-                  sds_config:
-                    resource_api_version: V3
-                    api_config_source:
-                      api_type: GRPC
-                      transport_api_version: V3
-                      grpc_services:
-                        envoy_grpc:
-                          cluster_name: spire_agent
+                tls_certificates:
+                  - certificate_chain:
+                      filename: "/etc/envoy/certs/envoy.crt"
+                    private_key:
+                      filename: "/etc/envoy/certs/envoy.key"
+                validation_context:
+                  trusted_ca:
+                    filename: "/etc/envoy/certs/ca.crt"
     - name: alert
       address:
         socket_address:
@@ -284,17 +218,6 @@ static_resources:
                     socket_address:
                       address: dummy-api
                       port_value: 8888
-    - name: spire_agent
-      connect_timeout: 0.25s
-      http2_protocol_options: {}
-      load_assignment:
-        cluster_name: spire_agent
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    pipe:
-                      path: /tmp/spire-agent/public/api.sock
     - name: webdis
       connect_timeout: 0.25s
       type: STRICT_DNS

@@ -74,5 +74,89 @@ openssl x509 -req -in opensearch.csr -CA ca.crt -CAkey ca.key -CAcreateserial -o
 Ensure the certificate was created correctly:
 
 ```bash
-openssl x509 -in ca.crt -text -noout
+openssl x509 -in opensearch.crt -text -noout
+```
+
+## 3. Create a Certificate for Envoy
+
+### 3.1. Generate the Private Key for Envoy
+
+```bash
+openssl genrsa -out envoy.key 4096
+```
+
+### 3.2. Create the CSR (Certificate Signing Request)
+
+See `envoy.cnf` file before creating the CSR, and change where is needed.
+
+```bash
+openssl req -new -key envoy.key -out envoy.csr -config envoy.cnf
+```
+
+### 3.3. Sign the CSR with the CA
+
+```bash
+openssl x509 -req -in envoy.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out envoy.crt -days 365 -sha256 -extensions v3_req -extfile envoy.cnf
+```
+
+Ensure the certificate was created correctly:
+
+```bash
+openssl x509 -in envoy.crt -text -noout
+```
+
+## 4. Create a Certificate for Normal
+
+### 4.1. Generate the Private Key for Normal
+
+```bash
+openssl genrsa -out normal.key 4096
+```
+
+### 4.2. Create the CSR (Certificate Signing Request)
+
+See `normal.cnf` file before creating the CSR, and change where is needed.
+
+```bash
+openssl req -new -key normal.key -out normal.csr -config normal.cnf
+```
+
+### 4.3. Sign the CSR with the CA
+
+```bash
+openssl x509 -req -in normal.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out normal.crt -days 365 -sha256 -extensions v3_req -extfile normal.cnf
+```
+
+Ensure the certificate was created correctly:
+
+```bash
+openssl x509 -in normal.crt -text -noout
+```
+
+## 5. Create a Certificate for Anomalous
+
+### 5.1. Generate the Private Key for Anomalous
+
+```bash
+openssl genrsa -out anomalous.key 4096
+```
+
+### 5.2. Create the CSR (Certificate Signing Request)
+
+See `anomalous.cnf` file before creating the CSR, and change where is needed.
+
+```bash
+openssl req -new -key anomalous.key -out anomalous.csr -config anomalous.cnf
+```
+
+### 5.3. Sign the CSR with the CA
+
+```bash
+openssl x509 -req -in anomalous.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out anomalous.crt -days 365 -sha256 -extensions v3_req -extfile anomalous.cnf
+```
+
+Ensure the certificate was created correctly:
+
+```bash
+openssl x509 -in anomalous.crt -text -noout
 ```
