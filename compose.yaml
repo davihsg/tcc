@@ -59,7 +59,7 @@ services:
     image: envoyproxy/envoy:contrib-v1.29.1
     volumes:
       - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
-      - ./envoy/lua/ratelimit.lua:/etc/lua/ratelimit.lua
+      - ./envoy/lua/access_control.lua:/etc/lua/access_control.lua
       - ./envoy/lua/alert.lua:/etc/lua/alert.lua
       - ./envoy/lua/lib:/var/lib/lua
       - ./certs/envoy.crt:/etc/envoy/certs/envoy.crt
