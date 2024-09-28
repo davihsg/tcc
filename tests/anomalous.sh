@@ -2,27 +2,29 @@
 
 HOST="https://localhost:10000"
 URI="/items"
-USER="2"
+USER="0"
 CERTS_FOLDERS="$HOME/tcc/users"
 CACERT="$CERTS_FOLDERS/bundle.$USER.pem"
 CERT="$CERTS_FOLDERS/svid.$USER.pem"
 KEY="$CERTS_FOLDERS/svid.$USER.key"
-TARGETS_FILE="targets.txt"
+TARGETS_FILE="anomalous_targets.txt"
+REPORT_FILE="anomalous_$(date +%s).report"
 INTERVAL=1
-RATE=0
+RATE=500
 WORKERS=100
 DURATION="50s"
 
 attack() {
   vegeta attack \
-    -cert $CERT \
-    -key $KEY \
-    -targets=targets.txt \
-    -root-certs $CACERT \
+    -cert=$CERT \
+    -key=$KEY \
+    -targets=$TARGETS_FILE \
+    -root-certs=$CACERT \
+    -max-body=0 \
     -insecure \
     -rate=$RATE \
-    -max-workers=$WORKERS \
-    -duration=$DURATION | vegeta report >> anomalous.report
+    -workers=100 \
+    -duration=$DURATION | vegeta report >> $REPORT_FILE
 }
 
 stop() {
@@ -33,8 +35,8 @@ stop() {
 
 echo "[anomalous] creating targets file"
 
-if [ ! -f "targets.txt" ]; then
-  echo "GET $HOST$URI" > targets.txt
+if [ ! -f "$TARGETS_FILE" ]; then
+  echo "GET $HOST$URI" > $TARGETS_FILE
   echo "[anomalous] targets created with default route"
 else
   echo "[anomalous] targets already exists, skipping..."
@@ -43,7 +45,7 @@ fi
 trap "stop" SIGINT
 trap "stop" SIGTERM
 
-echo "[anomalous] starting DDoS attack with $REQUESTS requests"
+echo "[anomalous] starting DDoS attack for $DURATION"
 
 attack
 
