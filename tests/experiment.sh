@@ -38,7 +38,7 @@ echo "[experiment] sleeping for $SLEEP seconds"
 sleep $SLEEP
 
 start_normal
-start_irregular
+#start irregular
 
 # waits ANOMALOUS_DELAY seconds before starting bot 3
 
@@ -51,8 +51,6 @@ start_anomalous
 SLEEP=$((RAMP_DOWN - ANOMALOUS_DELAY))
 echo "[experiment] sleeping for $SLEEP seconds"
 sleep $SLEEP
-
-stop_bots
 
 SLEEP=$((DURATION - RAMP_DOWN))
 echo "[experiment] sleeping for $SLEEP seconds"

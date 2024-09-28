@@ -4,15 +4,27 @@ HOST="https://localhost:10000"
 URI="/items"
 INTERVAL=20 
 USER="1"
-CERTS_FOLDERS="$HOME/tcc/users"
-CACERT="$CERTS_FOLDERS/bundle.$USER.pem"
-CERT="$CERTS_FOLDERS/svid.$USER.pem"
-KEY="$CERTS_FOLDERS/svid.$USER.key"
+CERTS_FOLDERS="$HOME/tcc/certs"
+CACERT="$CERTS_FOLDERS/ca.crt"
+CERT="$CERTS_FOLDERS/normal.crt"
+KEY="$CERTS_FOLDERS/normal.key"
+TARGETS_FILE="normal_targets.txt"
+REPORTS_FILE="normal.bin"
+INTERVAL=1
+RATE="4/1m"
+WORKERS=1
+DURATION="50s"
 
-function send_request {
-  curl -s -k -o /dev/null -w "%{http_code}" \
-    -X GET "$HOST$URI" \
-    --cacert $CACERT --cert $CERT --key $KEY
+function start {
+  vegeta attack \
+    -cert=$CERT \
+    -key=$KEY \
+    -targets=$TARGETS_FILE \
+    -root-certs=$CACERT \
+    -max-body=0 \
+    -rate=$RATE \
+    -workers=$WORKERS \
+    -duration=$DURATION > $REPORTS_FILE
 }
 
 stop() {
@@ -21,18 +33,20 @@ stop() {
   exit 0
 }
 
+echo "[normal] creating targets file"
+
+if [ ! -f "$TARGETS_FILE" ]; then
+  echo "GET $HOST$URI" > $TARGETS_FILE
+  echo "[normal] targets created with default route"
+else
+  echo "[normal] targets already exists, skipping..."
+fi
+
 trap "stop" SIGINT
 trap "stop" SIGTERM
 
-while true; do
-  RESPONSE_CODE=$(send_request)
-  
-  if [ "$RESPONSE_CODE" -eq 429 ]; then
-    echo "[normal] Received 429 Too Many Requests. Waiting for 1 minute"
-    sleep 60  # waits 1 minute in case of 429
-  else
-    echo "[normal] Request sent. Got response: $RESPONSE_CODE"
-    sleep $INTERVAL
-  fi
-done
+echo "[normal] starting..."
 
+start
+
+echo "[normal] stopping..."

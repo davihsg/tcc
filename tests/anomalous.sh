@@ -2,17 +2,16 @@
 
 HOST="https://localhost:10000"
 URI="/items"
-USER="0"
-CERTS_FOLDERS="$HOME/tcc/users"
-CACERT="$CERTS_FOLDERS/bundle.$USER.pem"
-CERT="$CERTS_FOLDERS/svid.$USER.pem"
-KEY="$CERTS_FOLDERS/svid.$USER.key"
+CERTS_FOLDERS="$HOME/tcc/certs"
+CACERT="$CERTS_FOLDERS/ca.crt"
+CERT="$CERTS_FOLDERS/anomalous.crt"
+KEY="$CERTS_FOLDERS/anomalous.key"
 TARGETS_FILE="anomalous_targets.txt"
-REPORT_FILE="anomalous_$(date +%s).report"
+REPORTS_FILE="anomalous.bin"
 INTERVAL=1
 RATE=500
 WORKERS=100
-DURATION="50s"
+DURATION="9m"
 
 attack() {
   vegeta attack \
@@ -21,10 +20,9 @@ attack() {
     -targets=$TARGETS_FILE \
     -root-certs=$CACERT \
     -max-body=0 \
-    -insecure \
     -rate=$RATE \
-    -workers=100 \
-    -duration=$DURATION | vegeta report >> $REPORT_FILE
+    -workers=$WORKERS \
+    -duration=$DURATION > $RESULTS_FILE
 }
 
 stop() {
