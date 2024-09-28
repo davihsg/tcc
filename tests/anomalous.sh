@@ -9,12 +9,13 @@ KEY="$CERTS_FOLDERS/anomalous.key"
 TARGETS_FILE="anomalous_targets.txt"
 REPORTS_FILE="anomalous.bin"
 INTERVAL=1
-RATE=500
-WORKERS=100
+RATE=300
+WORKERS=10
 DURATION="9m"
 
 attack() {
   vegeta attack \
+    -name="anomalous" \
     -cert=$CERT \
     -key=$KEY \
     -targets=$TARGETS_FILE \
@@ -22,7 +23,7 @@ attack() {
     -max-body=0 \
     -rate=$RATE \
     -workers=$WORKERS \
-    -duration=$DURATION > $RESULTS_FILE
+    -duration=$DURATION | tee anomalous.bin | vegeta encode --to=json --output=anomalous.json
 }
 
 stop() {
@@ -48,4 +49,3 @@ echo "[anomalous] starting DDoS attack for $DURATION"
 attack
 
 echo "[anomalous] DDoS attack finished (for now)"
-

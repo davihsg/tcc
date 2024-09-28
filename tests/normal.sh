@@ -11,12 +11,13 @@ KEY="$CERTS_FOLDERS/normal.key"
 TARGETS_FILE="normal_targets.txt"
 REPORTS_FILE="normal.bin"
 INTERVAL=1
-RATE="4/1m"
+RATE="15/1m"
 WORKERS=1
-DURATION="50s"
+DURATION="13m"
 
 function start {
   vegeta attack \
+    -name="normal" \
     -cert=$CERT \
     -key=$KEY \
     -targets=$TARGETS_FILE \
@@ -24,7 +25,7 @@ function start {
     -max-body=0 \
     -rate=$RATE \
     -workers=$WORKERS \
-    -duration=$DURATION > $REPORTS_FILE
+    -duration=$DURATION | tee normal.bin | vegeta encode --to=json --output=normal.json
 }
 
 stop() {

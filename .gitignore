@@ -3,3 +3,7 @@ api/server
 spire/data
 .DS_Store
 __pycache__/
+tests/anomalous.json
+tests/normal.json
+tests/anomalous.bin
+tests/normal.bin

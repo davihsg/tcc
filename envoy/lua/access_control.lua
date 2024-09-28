@@ -2,8 +2,8 @@ JSON = (loadfile("/var/lib/lua/JSON.lua"))()
 
 WEBDIS_CLUSTER = "webdis"
 GLOBAL_KEY = "global"
-OFFSET = -300 -- in seconds
-PENALTY_LIMIT = 0
+WINDOW_SIZE = 300 -- in seconds
+PENALTY_LIMIT = 3
 
 local function url_encode(str)
 	if str then
@@ -51,7 +51,7 @@ function envoy_on_request(request_handle)
 
 	local key = uris[1] -- spiffe_id
 
-	local start = os.date("!%Y-%m-%dT%H:%M:%S", os.time() - OFFSET) .. "Z"
+	local start = os.date("!%Y-%m-%dT%H:%M:%S", os.time() - WINDOW_SIZE) .. "Z"
 
 	request_handle:logDebug(start)
 
@@ -72,6 +72,10 @@ function envoy_on_request(request_handle)
 		[":authority"] = WEBDIS_CLUSTER,
 	}, "", 1000)
 
+	local response = {
+		message = "You have exceeded your request limit. Please wait before making further requests.",
+	}
+
 	if headers[":status"] == "200" then
 		local data = JSON:decode(body)
 
@@ -79,25 +83,13 @@ function envoy_on_request(request_handle)
 		local global_scope = tonumber(data["EVAL"][2]) or 0
 
 		if global_scope > PENALTY_LIMIT then
-			local response = {
-				message = "The server might be overloaded. Please try again later",
-			}
-
-			request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
+			request_handle:respond({ [":status"] = "403" }, JSON:encode(response))
 		end
 
 		if alerts > PENALTY_LIMIT then
-			local response = {
-				message = "You have exceeded your request limit. Please wait before making further requests.",
-			}
-
-			request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
+			request_handle:respond({ [":status"] = "403" }, JSON:encode(response))
 		end
 	else
-		local response = {
-			message = "The server might be overloaded. Please try again later",
-		}
-
-		request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
+		request_handle:respond({ [":status"] = "403" }, JSON:encode(response))
 	end
 end

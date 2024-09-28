@@ -15,4 +15,4 @@ CN = anomalous.dhsg.com
 subjectAltName = @alt_names
 
 [ alt_names ]
-URI = https://dhsg.com/anomalous
+URI = spiffe://dhsg.com/anomalous
