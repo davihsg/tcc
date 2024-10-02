@@ -1,4 +1,5 @@
 ![opensearch+envoy](https://github.com/davihsg/tcc/raw/main/assets/opensearch+envoy.png)
+
 # Opensearch and Envoy
 
 This repository presents a simple, yet sophisticated, implementation of access control using Envoy Proxy and Opensearch.
@@ -49,27 +50,27 @@ Every component of the system is running on a docker container, except for the S
 
 1. **Networks**
 
-    The system is organized into two networks: 
+   The system is organized into two networks:
 
-    - **webdis** (includes Envoy and Webdis containers)
-    - **world** (includes OpenSearch, Envoy, API, and Fluent Bit)
+   - **webdis** (includes Envoy and Webdis containers)
+   - **world** (includes OpenSearch, Envoy, API, and Fluent Bit)
 
 2. **Containers**
 
-    The system has six containers:
+   The system has six containers:
 
-    - **opensearch** on single-node mode;
-    - **opensearch dashboards** to set up alerts;
-    - **fluent bit** to ingest logs from envoy into opensearch;
-    - **dummy api** to simulate a real upstream service;
-    - **envoy** to handle communication between components;
-    - **webdis (+ redis)** for storing data and fetching Redis via HTTP;
+   - **opensearch** on single-node mode;
+   - **opensearch dashboards** to set up alerts;
+   - **fluent bit** to ingest logs from envoy into opensearch;
+   - **dummy api** to simulate a real upstream service;
+   - **envoy** to handle communication between components;
+   - **webdis (+ redis)** for storing data and fetching Redis via HTTP;
 
 3. **Volumes**
 
-    There is only one volume:
+   There is only one volume:
 
-    - **opensearch-data** for storing opensearch in disk (and not lose everything - yes, this happened)
+   - **opensearch-data** for storing opensearch in disk (and not lose everything - yes, this happened)
 
 To start all containers, simple run:
 
@@ -88,6 +89,7 @@ Modify Envoy’s configuration to include a listener filter that outputs logs in
 The log must contain a `spiffe_id` field. See this [example](https://github.com/davihsg/tcc/blob/main/envoy/envoy.yaml#L122). Adding useful information such as listener and duration is really useful since you can create different monitors with them. Check the example for more information.
 
 Example:
+
 ```yaml
 - name: envoy.http_connection_manager
  config:
@@ -95,7 +97,7 @@ Example:
    - name: envoy.file_access_log
      config:
        path: /dev/stdout
-       json_format: 
+       json_format:
          ...
          spiffe_id: "%DOWNSTREAM_PEER_URI_SAN%"
 ```
@@ -105,6 +107,7 @@ Example:
 On the API listener, add an HTTP Lua filter that runs the `ratelimit.lua` script. The script will check the rate limits by querying the Redis database via Webdis.
 
 Example:
+
 ```yaml
 - name: envoy.filters.http.lua
  typed_config:
@@ -128,9 +131,10 @@ There are two types of alerts: user alerts and global alerts. User alerts are th
 Each alert has a severity level going from 1 (highest) to 5 (lowest). You can define the penalty for each level on the script `alert.lua`.
 
 Example:
+
 ```yaml
 listener:
-...
+---
 - name: alert
   address:
     socket_address:
@@ -176,46 +180,47 @@ Additionally, the script updates OpenSearch for auditing purposes, maintaining a
 
 ```yaml
 cluster:
-- name: webdis
-  connect_timeout: 0.25s
-  type: STRICT_DNS
-  load_assignment:
-    cluster_name: webdis
-    endpoints:
-      - lb_endpoints:
-          - endpoint:
-              address:
-                socket_address:
-                  address: webdis
-                  port_value: 7379
-- name: opensearch
-  connect_timeout: 0.25s
-  type: STRICT_DNS
-  transport_socket:
-    name: envoy.transport_sockets.tls
-    typed_config:
-      "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-      sni: opensearch
-  load_assignment:
-    cluster_name: opensearch
-    endpoints:
-      - lb_endpoints:
-          - endpoint:
-              address:
-                socket_address:
-                  address: opensearch
-                  port_value: 9200
+  - name: webdis
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    load_assignment:
+      cluster_name: webdis
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: webdis
+                    port_value: 7379
+  - name: opensearch
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+        sni: opensearch
+    load_assignment:
+      cluster_name: opensearch
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: opensearch
+                    port_value: 9200
 ```
 
 ### 4. Set Up OpenSearch
 
 #### 4.1. Create an Index for Envoy Access Logs
 
-You need to create a mapping in OpenSearch for storing Envoy’s access logs. This index will be the same set up in Fluent Bit. 
+You need to create a mapping in OpenSearch for storing Envoy’s access logs. This index will be the same set up in Fluent Bit.
 
 You can create the index and its mapping using a `curl` command, or by refreshing the current index. Check [envoy_mapping.json](https://github.com/davihsg/tcc/tree/main/opensearch/envoy_mapping.json).
 
 Example `curl` command for creating an index:
+
 ```bash
 curl --cacert certs/ca.crt -X PUT "http://opensearch:9200/envoy" -H 'Content-Type: application/json' -d'
 {
@@ -236,6 +241,7 @@ This index will store alert documents sent by the Envoy for further analysis.
 You can create the index and its mapping using a `curl` command, or by refreshing the current index. Check [envoy-alerts_mapping.json](https://github.com/davihsg/tcc/tree/main/opensearch/envoy-alerts_mapping.json).
 
 Example `curl` command:
+
 ```bash
 curl --cacert certs/ca.crt -X PUT "http://opensearch:9200/envoy_alerts" -H 'Content-Type: application/json' -d'
 {
@@ -257,22 +263,22 @@ The webhook should be configured with the Envoy Alert Handler URL. It should lik
 
 ```json
 {
- "config_id": "OqskdpEBl4KNMQxhQMg1",
- "last_updated_time_ms": 1724264264843,
- "created_time_ms": 1724263972913,
- "config": {
-   "name": "alerting-api",
-   "description": "",
-   "config_type": "webhook",
-   "is_enabled": true,
-   "webhook": {
-     "url": "http://envoy:31415/alert",
-     "header_params": {
-       "Content-Type": "application/json"
-     },
-     "method": "POST"
-   }
- }
+  "config_id": "OqskdpEBl4KNMQxhQMg1",
+  "last_updated_time_ms": 1724264264843,
+  "created_time_ms": 1724263972913,
+  "config": {
+    "name": "alerting-api",
+    "description": "",
+    "config_type": "webhook",
+    "is_enabled": true,
+    "webhook": {
+      "url": "http://envoy:31415/alert",
+      "header_params": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    }
+  }
 }
 ```
 
@@ -280,18 +286,18 @@ The webhook should be configured with the Envoy Alert Handler URL. It should lik
 
 1. **Monitors**
 
-    In OpenSearch, create monitors to watch the logs and generate alerts based on specific conditions.
+   In OpenSearch, create monitors to watch the logs and generate alerts based on specific conditions.
 
-    The index mappings may have nested fields, especially the keyword ones. Opensearch Dashboards UI has problems when showing the group by options because of it, so the monitor should be created using `extraction query` or `via curl`. Here is an [example](https://github.com/davihsg/tcc/tree/main/opensearch/monitors/sum_duration_monitor.json) of how it should look like.
+   The index mappings may have nested fields, especially the keyword ones. Opensearch Dashboards UI has problems when showing the group by options because of it, so the monitor should be created using `extraction query` or `via curl`. Here is an [example](https://github.com/davihsg/tcc/tree/main/opensearch/monitors/sum_duration_monitor.json) of how it should look like.
 
-    There are two primary types of monitors: bucket and query monitors. With bucket ones, you can aggregate metrics based on a key and an alert will be triggered for each key. With query ones, you can specific a query and an alert will be triggered based on a defined threshold.
+   There are two primary types of monitors: bucket and query monitors. With bucket ones, you can aggregate metrics based on a key and an alert will be triggered for each key. With query ones, you can specific a query and an alert will be triggered based on a defined threshold.
 
 2. **Triggers**
 
-    Create triggers for the monitors. Documentation is quite scarce in this area, so you should opt to create them using an `extraction query` or via `curl`. Here is an [example](https://github.com/davihsg/tcc/tree/main/opensearch/monitors/trigger_condition.json) of how its condition should look like.
+   Create triggers for the monitors. Documentation is quite scarce in this area, so you should opt to create them using an `extraction query` or via `curl`. Here is an [example](https://github.com/davihsg/tcc/tree/main/opensearch/monitors/trigger_condition.json) of how its condition should look like.
 
-    ```json
-    {
+   ```json
+   {
      "buckets_path": {
        "sum_duration": "sum_duration"
      },
@@ -301,51 +307,53 @@ The webhook should be configured with the Envoy Alert Handler URL. It should lik
        "lang": "painless"
      },
      "gap_policy": "skip"
-    }
-    ```
+   }
+   ```
 
-    Add actions to the triggers that will send a JSON message with alert details when new alerts are generated or completed. This message will be sent via the webhook channel you configured earlier. The actions must be `Per Query`.
+   Add actions to the triggers that will send a JSON message with alert details when new alerts are generated or completed. This message will be sent via the webhook channel you configured earlier. The actions must be `Per Query`.
 
-    Even though you can set the custom webhook to send an HTTP request with `Content-Type: application/json`, OpenSearch just the text from the message, so you must set the json yourself.
+   Even though you can set the custom webhook to send an HTTP request with `Content-Type: application/json`, OpenSearch just the text from the message, so you must set the json yourself.
 
-    Example trigger alert message for bucket monitors:
-    ```mustache
-    {
-     "alerts": [
-       {{#ctx.newAlerts}}
-       {
-         "type" : "bucket",
-         "key": "{{bucket_keys}}",
-         "monitor_name": "{{ctx.monitor.name}}",
-         "trigger_name": "{{ctx.trigger.name}}",
-         "trigger_severity": {{ctx.trigger.severity}},
-         "period_start": "{{ctx.periodStart}}",
-         "period_end": "{{ctx.periodEnd}}",
-         "global_scope": false
-       },
-       {{/ctx.newAlerts}}
-       {{#ctx.dedupedAlerts}}
-       {
-         "type" : "bucket",
-         "key": "{{bucket_keys}}",
-         "monitor_name": "{{ctx.monitor.name}}",
-         "trigger_name": "{{ctx.trigger.name}}",
-         "trigger_severity": {{ctx.trigger.severity}},
-         "period_start": "{{ctx.periodStart}}",
-         "period_end": "{{ctx.periodEnd}}",
-         "global_scope": false
-       },
-       {{/ctx.dedupedAlerts}}
-       null
-     ]
-    }
-    ```
+   Example trigger alert message for bucket monitors:
+
+   ```mustache
+   {
+    "alerts": [
+      {{#ctx.newAlerts}}
+      {
+        "type" : "bucket",
+        "key": "{{bucket_keys}}",
+        "monitor_name": "{{ctx.monitor.name}}",
+        "trigger_name": "{{ctx.trigger.name}}",
+        "trigger_severity": {{ctx.trigger.severity}},
+        "period_start": "{{ctx.periodStart}}",
+        "period_end": "{{ctx.periodEnd}}",
+        "global_scope": false
+      },
+      {{/ctx.newAlerts}}
+      {{#ctx.dedupedAlerts}}
+      {
+        "type" : "bucket",
+        "key": "{{bucket_keys}}",
+        "monitor_name": "{{ctx.monitor.name}}",
+        "trigger_name": "{{ctx.trigger.name}}",
+        "trigger_severity": {{ctx.trigger.severity}},
+        "period_start": "{{ctx.periodStart}}",
+        "period_end": "{{ctx.periodEnd}}",
+        "global_scope": false
+      },
+      {{/ctx.dedupedAlerts}}
+      null
+    ]
+   }
+   ```
 
 ### 5. Accessing the API
 
 The rate limiting is now set up. Users can access the API through Envoy by passing the appropriate SVID certificate with their requests.
 
 Example request:
+
 ```bash
 curl --cacert ca.crt --cert normal.crt --key normal.key "https://localhost:10002/items"
 ```

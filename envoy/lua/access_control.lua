@@ -72,10 +72,6 @@ function envoy_on_request(request_handle)
 		[":authority"] = WEBDIS_CLUSTER,
 	}, "", 1000)
 
-	goto continue
-
-	-------------
-
 	local response = {
 		message = "You have exceeded your request limit. Please wait before making further requests.",
 	}
@@ -87,17 +83,13 @@ function envoy_on_request(request_handle)
 		local global_scope = tonumber(data["EVAL"][2]) or 0
 
 		if global_scope > PENALTY_LIMIT then
-			request_handle:respond({ [":status"] = "403" }, JSON:encode(response))
+			request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
 		end
 
 		if alerts > PENALTY_LIMIT then
-			request_handle:respond({ [":status"] = "403" }, JSON:encode(response))
+			request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
 		end
 	else
-		request_handle:respond({ [":status"] = "403" }, JSON:encode(response))
+		request_handle:respond({ [":status"] = "429" }, JSON:encode(response))
 	end
-
-	--------------
-
-	::continue::
 end
