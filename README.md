@@ -12,7 +12,7 @@ In this scenario, traditional security models are unfeasible or unable to protec
 
 From this need for more sophisticated and dynamic security models capable of handling the increasing complexity of systems, the Zero Trust (ZT) paradigm emerges. ZT is a set of principles and ideas that minimize uncertainty through least privilege access policies.
 
-This work explores the integration of three open-source tools, SPIRE, Envoy, and OpenSearch, to implement an Attribute-Based Access Control (ABAC) system following the principles of Zero Trust (ZT). In this system, SPIRE identifies the entities, and Envoy's access logs are processed by OpenSearch. The system is based on a penalty mechanism, where the behavior of entities and the attributes of resources determine the access decision policy.
+This work explores the integration of three open-source tools, Envoy, and OpenSearch, to implement an Attribute-Based Access Control (ABAC) system following the principles of Zero Trust (ZT). In this system, Envoy's access logs are processed by OpenSearch. The system is based on a penalty mechanism, where the behavior of entities and the attributes of resources determine the access decision policy.
 
 ## Architecture Overview
 
@@ -46,7 +46,7 @@ For a detailed guide on how to create all certificates, please refer to the link
 
 ### 2. Starting the services
 
-Every component of the system is running on a docker container, except for the SPIRE instances. Docker Compose is ideal for this setup because of its built-in DNS, which simplifies communication between services.
+Every component of the system is running on a docker container. Docker Compose is ideal for this setup because of its built-in DNS, which simplifies communication between services.
 
 1. **Networks**
 
@@ -86,7 +86,7 @@ By running `docker compose up -d`, this step is already configured, but read it 
 
 Modify Envoy’s configuration to include a listener filter that outputs logs in JSON format. This ensures that Fluent Bit can easily parse and forward these logs to OpenSearch.
 
-The log must contain a `spiffe_id` field. See this [example](https://github.com/davihsg/tcc/blob/main/envoy/envoy.yaml#L122). Adding useful information such as listener and duration is really useful since you can create different monitors with them. Check the example for more information.
+The log must contain a `uri` field. See this [example](https://github.com/davihsg/tcc/blob/main/envoy/envoy.yaml#L122). Adding useful information such as listener and duration is really useful since you can create different monitors with them. Check the example for more information.
 
 Example:
 
@@ -99,7 +99,7 @@ Example:
        path: /dev/stdout
        json_format:
          ...
-         spiffe_id: "%DOWNSTREAM_PEER_URI_SAN%"
+         uri: "%DOWNSTREAM_PEER_URI_SAN%"
 ```
 
 #### 3.2. Add Lua Script for Rate Limiting
@@ -116,9 +116,9 @@ Example:
      filename: /etc/lua/ratelimit.lua
 ```
 
-The [lua script](https://github.com/davihsg/tcc/blob/main/envoy/lua/ratelimit.lua) just gets the value from two keys: the spiffe id, and a global key. If either one of them is greater than `PENALTY_LIMIT`, meaning that there are an ongoing alerts, Envoy returns `429 - Too Many Requests` - immediatly. Otherwise, the request is processed normally. You can set the `PENALTY_LIMIT` on the script, the default is 0.
+The [lua script](https://github.com/davihsg/tcc/blob/main/envoy/lua/ratelimit.lua) just gets the value from two keys: the uri, and a global key. If either one of them is greater than `PENALTY_LIMIT`, meaning that there are an ongoing alerts, Envoy returns `429 - Too Many Requests` - immediatly. Otherwise, the request is processed normally. You can set the `PENALTY_LIMIT` on the script, the default is 0.
 
-The script works as a time window accumulator that checks the sum of penalty for a SPIFFE ID, and also ongoing problems for the system. First, it removes entries less than `current_time - OFFSET`, then returns the sum of the remaining values. This not only cleans the entries on Redis, but also protects a user from running into a deadlock. Define the `OFFSET` variable with the time you want.
+The script works as a time window accumulator that checks the sum of penalty for an URI, and also ongoing problems for the system. First, it removes entries less than `current_time - WINDOW_SIZE`, then returns the sum of the remaining values. This not only cleans the entries on Redis, but also protects a user from running into a deadlock. Define the `WINDOW_SIZE` variable with the time you want.
 
 #### 3.3. Set Up Dedicated Alert listener
 
