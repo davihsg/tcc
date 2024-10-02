@@ -7,14 +7,14 @@ fi
 
 N=$1
 SVC_USER="server"
-DB_DIR="../api"
+DB_DIR="../dummy-api"
 DB_FILE="$DB_DIR/items.db"
 
 if [ ! -d "$DB_DIR" ]; then
     echo "Creating directory $DB_DIR"
     sudo mkdir -p "$DB_DIR"
     # sudo chown $SVC_USER:$SVC_USER "$DB_DIR"
-    sudo chmod 750 "$DB_DIR"
+    sudo chmod 755 "$DB_DIR"
 fi
 
 # creating table

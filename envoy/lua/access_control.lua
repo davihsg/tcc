@@ -72,6 +72,10 @@ function envoy_on_request(request_handle)
 		[":authority"] = WEBDIS_CLUSTER,
 	}, "", 1000)
 
+	goto continue
+
+	-------------
+
 	local response = {
 		message = "You have exceeded your request limit. Please wait before making further requests.",
 	}
@@ -92,4 +96,8 @@ function envoy_on_request(request_handle)
 	else
 		request_handle:respond({ [":status"] = "403" }, JSON:encode(response))
 	end
+
+	--------------
+
+	::continue::
 end

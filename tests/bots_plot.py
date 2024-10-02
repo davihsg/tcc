@@ -10,8 +10,8 @@ if len(sys.argv) != 2:
 
 user = sys.argv[1]
 
-start_time_str = "2024-09-28T18:54:09Z"
-end_time_str = "2024-09-28T19:09:09Z"
+start_time_str = "2024-09-29T18:29:10Z"
+end_time_str = "2024-09-29T18:38:10Z"
 start_time = pd.to_datetime(start_time_str)
 end_time = pd.to_datetime(end_time_str)
 
@@ -62,6 +62,7 @@ status_codes_unique = grouped["status_code"].unique()
 
 for code in status_codes_unique:
     subset = grouped[grouped["status_code"] == code]
+    if(code == 403): code = 429
     plt.plot(subset["time_interval"], subset["mean"], label=f"{code}")
     # plt.plot(subset['time_interval'], subset['p95'], label=f'Status {code} - 95º Percentil', marker='x')
 

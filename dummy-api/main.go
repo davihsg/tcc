@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"net/http"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -9,7 +10,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var db *sql.DB
+type Item struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	Description string `json:"description"`
+}
+
+func Handler(router *gin.Engine, dbPath string) {
+	router.GET("/items", func(ctx *gin.Context) {
+		db, err := sql.Open("sqlite3", dbPath)
+		if err != nil {
+			panic(err)
+		}
+		defer db.Close()
+
+		rows, err := db.Query("SELECT id, name, price, description FROM items")
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		defer rows.Close()
+
+		var items []Item
+		for rows.Next() {
+			var item Item
+			err = rows.Scan(&item.ID, &item.Name, &item.Price, &item.Description)
+			if err != nil {
+				ctx.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			items = append(items, item)
+		}
+
+		ctx.JSON(http.StatusOK, items)
+	})
+}
 
 func main() {
 	dbPath := os.Getenv("DB_PATH")
@@ -17,19 +53,9 @@ func main() {
 		dbPath = "items.db"
 	}
 
-	var err error
-
-	db, err = sql.Open("sqlite3", dbPath)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
 	router := gin.Default()
 
-	WithoutAuthHandler(router)
-
-	WithAuthHandler(router)
+	Handler(router, dbPath)
 
 	port := os.Getenv("PORT")
 	if port == "" {

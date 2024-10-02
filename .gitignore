@@ -7,3 +7,4 @@ tests/anomalous.json
 tests/normal.json
 tests/anomalous.bin
 tests/normal.bin
+.pyenv

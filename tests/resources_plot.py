@@ -14,16 +14,12 @@ es = OpenSearch(
     verify_certs=False,
 )
 
-start_time_str = "2024-09-28T18:54:09Z"
-end_time_str = "2024-09-28T19:09:09Z"
+start_time_str = "2024-09-29T19:33:12Z"
+end_time_str = "2024-09-29T19:42:12Z"
 start_time = pd.to_datetime(start_time_str)
 end_time = pd.to_datetime(end_time_str)
 
-query = {
-    "query": {"range": {"timestamp": {"gte": start_time_str, "lte": end_time_str}}},
-    "sort": [{"timestamp": {"order": "asc"}}],
-    "_source": ["timestamp", "cpu_perc", "mem_perc"],
-}
+query = { "query": { "bool": { "must": [ { "range": { "timestamp": { "gte": start_time_str, "lte": end_time_str } } }, { "term": { "container_name.keyword": "dummy-api" } } ] } }, "sort": [ { "timestamp": { "order": "asc" } } ], "_source": [ "timestamp", "cpu_perc", "mem_perc" ] }
 
 # Executa a busca
 index_name = "containers"

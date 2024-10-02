@@ -2,10 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from opensearchpy import OpenSearch
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+import time
 
 es = OpenSearch(
     hosts=[{"host": "localhost", "port": 9200}],
@@ -14,7 +11,7 @@ es = OpenSearch(
     verify_certs=False,
 )
 
-start_time_str = "2024-09-27T18:54:09Z"
+start_time_str = "2024-09-29T00:54:09Z"
 
 query = {
     "query": {"range": {"timestamp": {"gte": start_time_str}}},
@@ -28,11 +25,9 @@ index_name = "envoy"
 try:
     response = es.search(index=index_name, body=query, size=10000)
 except Exception as e:
-    logger.error(f"Erro ao conectar ao OpenSearch: {e}")
     exit()
 
 if not response["hits"]["hits"]:
-    logger.info("Nenhum dado encontrado no intervalo de tempo especificado.")
     exit()
 
 cnt = 0
@@ -46,6 +41,8 @@ for hit in response["hits"]["hits"]:
     except Exception as e:
         print(f"Erro ao excluir o documento {doc_id}: {e}")
         exit(1)
+
+    time.sleep(0.2)
 
     if cnt % 100 == 0:
         print(f"done {cnt}")

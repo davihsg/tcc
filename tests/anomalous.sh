@@ -2,7 +2,7 @@
 
 HOST="https://localhost:10000"
 URI="/items"
-CERTS_FOLDERS="$HOME/tcc/certs"
+CERTS_FOLDERS="$HOME/programacao/tcc/tcc/certs"
 CACERT="$CERTS_FOLDERS/ca.crt"
 CERT="$CERTS_FOLDERS/anomalous.crt"
 KEY="$CERTS_FOLDERS/anomalous.key"
@@ -44,7 +44,7 @@ fi
 trap "stop" SIGINT
 trap "stop" SIGTERM
 
-echo "[anomalous] starting DDoS attack for $DURATION"
+echo "[anomalous] starting DDoS attack for $DURATION at $(date -u)"
 
 attack
 
